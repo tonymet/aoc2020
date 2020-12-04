@@ -5,9 +5,13 @@ import (
 	"io"
 )
 
-/*
+var fields []string = []string{"byr",
+	"byr", "iyr", "eyr", "hgt", "hcl",
+	"ecl", "pid", /*"cid",*/
+}
 
-byr (Birth Year)
+/*,
+byr,(Birth Year)
 iyr (Issue Year)
 eyr (Expiration Year)
 hgt (Height)
@@ -26,15 +30,13 @@ type passport struct {
 }
 
 func (p passport) ok() bool {
-	_, ok1 := p.fields["byr"]
-	_, ok2 := p.fields["iyr"]
-	_, ok3 := p.fields["eyr"]
-	_, ok4 := p.fields["hgt"]
-	_, ok5 := p.fields["hcl"]
-	_, ok6 := p.fields["ecl"]
-	_, ok7 := p.fields["pid"]
-	//_, ok8 := p.fields["cid"]
-	return ok1 && ok2 && ok3 && ok4 && ok5 && ok6 && ok7
+	for _, f := range fields {
+		_, ok := p.fields[f]
+		if !ok {
+			return false
+		}
+	}
+	return true
 }
 
 func main() {

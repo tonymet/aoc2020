@@ -22,12 +22,10 @@ func (r record) isValid() bool {
 
 func readRec() (record, error) {
 	var cur record
-	var query string
-	_, err := fmt.Scanf("%d-%d %s %s\n", &cur.low, &cur.high, &query, &cur.password)
+	_, err := fmt.Scanf("%d-%d %1s: %s\n", &cur.low, &cur.high, &cur.query, &cur.password)
 	if err != nil {
 		return record{}, err
 	}
-	cur.query = string(query[0])
 	return cur, err
 }
 

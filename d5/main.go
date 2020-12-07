@@ -1,13 +1,39 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
+func scanFile() {
+	var (
+		seatPath string
+		maxID    int = 0
+	)
+
+	for {
+		n, err := fmt.Scanf("%10s\n", &seatPath)
+		if n != 1 {
+			fmt.Errorf("error reading file")
+		}
+		seatID := seatID(seatPath)
+		if seatID > maxID {
+			maxID = seatID
+		}
+		fmt.Printf("seatPath: %s, seatID: %d\n", seatPath, seatID)
+		if err == io.EOF {
+			break
+		}
+	}
+	fmt.Printf("MaxID: %d", maxID)
+
+}
 func getRow(rowid string) int {
 	l, r := 0, 128
 	d, i := 64, 0
 
 	for d >= 1 {
-		fmt.Printf("op, r, l , d , i : %s, %s, %s, %s, %s\n", string(rowid[i]), r, l, d, i)
+		//fmt.Printf("op, r, l , d , i : %s, %s, %s, %s, %s\n", string(rowid[i]), r, l, d, i)
 		cur := rowid[i]
 		switch cur {
 		case 'F':
@@ -51,10 +77,5 @@ func seatID(seatPath string) int {
 	return (row * 8) + col
 }
 func main() {
-	fmt.Println("hello")
-	row := getRow("FFFBBBF")
-	col := getCol("RRR")
-	seatid := seatID("BBFFBBFRLL")
-	fmt.Printf("row: %d, col: %d, seatID: %s\n", row, col, seatid)
-
+	scanFile()
 }

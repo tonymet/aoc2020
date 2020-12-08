@@ -5,6 +5,31 @@ import (
 	"io"
 )
 
+const (
+	loop     = iota
+	exited   = iota
+	oob      = iota
+	notfound = iota
+)
+
+type execError struct {
+	code int
+}
+
+func (e execError) Error() string {
+	switch e.code {
+	case oob:
+		return "OOB"
+	case loop:
+		return "Looped"
+	case exited:
+	default:
+		return "Exited"
+
+	}
+	return "other"
+}
+
 type inst struct {
 	cmd          string
 	arg, visited int
@@ -30,18 +55,12 @@ func scanFile() {
 	//fmt.Printf("theProgram len: %d\n", len(theProgram))
 }
 
-func exec(curProgram []inst) {
+func exec(curProgram []inst) (int, error) {
 	// iterate at begining
 	// case on instruction
 	// increment visit
 	// store accumulator
 	// error when visited > 0
-	defer func() {
-		// recover from panic if one occured. Set err to nil otherwise.
-		if recover() != nil {
-			fmt.Printf("error out of bounds\n")
-		}
-	}()
 	var (
 		accumulator = 0
 		i           = 0
@@ -51,13 +70,13 @@ func exec(curProgram []inst) {
 	for {
 		if i >= len(curProgram) {
 			fmt.Printf("out of bounds : %+v, acc: %d\n", cur, accumulator)
-			return
+			return accumulator, execError{oob}
 		}
 		cur = &curProgram[i]
 		cur.visited++
 		if cur.visited > 1 {
-			fmt.Printf("already seen : %+v, acc: %d\n", cur, accumulator)
-			return
+			//fmt.Printf("already seen : %+v, acc: %d\n", cur, accumulator)
+			return accumulator, execError{loop}
 		}
 		switch cur.cmd {
 		case "jmp":
@@ -68,8 +87,8 @@ func exec(curProgram []inst) {
 		case "nop":
 			i++
 		case "exit":
-			fmt.Printf("exited : %+v, acc: %d\n", cur, accumulator)
-			return
+			//fmt.Printf("exited : %+v, acc: %d\n", cur, accumulator)
+			return accumulator, execError{exited}
 		default:
 			panic("cmd err")
 		}
@@ -81,7 +100,7 @@ func resetProgram(curProgram *[]inst) {
 		(*curProgram)[i].visited = 0
 	}
 }
-func part2Exec(curProgram []inst) {
+func part2Exec(curProgram []inst) (int, error) {
 	// add exit command
 	// brute force changes
 	// run until exit is hit
@@ -92,19 +111,26 @@ func part2Exec(curProgram []inst) {
 		resetProgram(&copyOfProgram)
 		switch cur.cmd {
 		case "jmp":
-			fmt.Printf("line %d changing jmp to nop\n", i)
 			copyOfProgram[i].cmd = "nop"
-			exec(copyOfProgram)
 		case "nop":
-			fmt.Printf("line %d changing nop to jmp\n", i)
 			copyOfProgram[i].cmd = "jmp"
-			exec(copyOfProgram)
+		}
+		acc, err := exec(copyOfProgram)
+		if e, ok := err.(execError); ok && e.code == exited {
+			return acc, err
 		}
 	}
+	return 0, execError{notfound}
 }
 
 func main() {
 	scanFile()
-	exec(theProgram)
-	part2Exec(theProgram)
+	acc, err := exec(theProgram)
+	if e, ok := err.(execError); ok && e.code == loop {
+		fmt.Printf("Part1 loop: accumulator = %d\n", acc)
+	}
+	acc, err = part2Exec(theProgram)
+	if e, ok := err.(execError); ok && e.code == exited {
+		fmt.Printf("Part2 exited: accumulator = %d\n", acc)
+	}
 }

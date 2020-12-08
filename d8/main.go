@@ -1,34 +1,19 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
-)
-
-const (
-	loop     = iota
-	exited   = iota
-	oob      = iota
-	notfound = iota
 )
 
 type execError struct {
 	code int
 }
 
-func (e execError) Error() string {
-	switch e.code {
-	case oob:
-		return "OOB"
-	case loop:
-		return "Looped"
-	case exited:
-	default:
-		return "Exited"
-
-	}
-	return "other"
-}
+var ErrLoop = errors.New("loop")
+var ErrExited = errors.New("exited")
+var ErrOOB = errors.New("OOB")
+var ErrNotFound = errors.New("Not Found")
 
 type inst struct {
 	cmd          string
@@ -70,13 +55,13 @@ func exec(curProgram []inst) (int, error) {
 	for {
 		if i >= len(curProgram) {
 			fmt.Printf("out of bounds : %+v, acc: %d\n", cur, accumulator)
-			return accumulator, execError{oob}
+			return accumulator, ErrOOB
 		}
 		cur = &curProgram[i]
 		cur.visited++
 		if cur.visited > 1 {
 			//fmt.Printf("already seen : %+v, acc: %d\n", cur, accumulator)
-			return accumulator, execError{loop}
+			return accumulator, ErrLoop
 		}
 		switch cur.cmd {
 		case "jmp":
@@ -88,7 +73,7 @@ func exec(curProgram []inst) (int, error) {
 			i++
 		case "exit":
 			//fmt.Printf("exited : %+v, acc: %d\n", cur, accumulator)
-			return accumulator, execError{exited}
+			return accumulator, ErrExited
 		default:
 			panic("cmd err")
 		}
@@ -116,21 +101,23 @@ func part2Exec(curProgram []inst) (int, error) {
 			copyOfProgram[i].cmd = "jmp"
 		}
 		acc, err := exec(copyOfProgram)
-		if e, ok := err.(execError); ok && e.code == exited {
+		if err == ErrExited {
 			return acc, err
 		}
 	}
-	return 0, execError{notfound}
+	return 0, ErrNotFound
 }
 
 func main() {
 	scanFile()
 	acc, err := exec(theProgram)
-	if e, ok := err.(execError); ok && e.code == loop {
+	if err == ErrLoop {
 		fmt.Printf("Part1 loop: accumulator = %d\n", acc)
 	}
 	acc, err = part2Exec(theProgram)
-	if e, ok := err.(execError); ok && e.code == exited {
+	if err == ErrExited {
 		fmt.Printf("Part2 exited: accumulator = %d\n", acc)
+	} else {
+		panic(err)
 	}
 }

@@ -1,12 +1,9 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"io"
 )
-
-var part2 *bool
 
 type inst struct {
 	cmd          string
@@ -92,6 +89,7 @@ func part2Exec(curProgram []inst) {
 	for i, cur := range curProgram {
 		copyOfProgram := make([]inst, len(curProgram))
 		copy(copyOfProgram, curProgram)
+		resetProgram(&copyOfProgram)
 		switch cur.cmd {
 		case "jmp":
 			fmt.Printf("line %d changing jmp to nop\n", i)
@@ -106,7 +104,6 @@ func part2Exec(curProgram []inst) {
 }
 
 func main() {
-	part2 = flag.Bool("part2", false, "part2")
 	scanFile()
 	exec(theProgram)
 	part2Exec(theProgram)

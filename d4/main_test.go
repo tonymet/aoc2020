@@ -15,7 +15,7 @@ func Test_checkPid(t *testing.T) {
 	}{
 		{
 			"passport",
-			args{"#123456789"},
+			args{"123456789"},
 			true,
 		},
 	}
@@ -101,6 +101,11 @@ func Test_checkHeight(t *testing.T) {
 		{
 			"height",
 			args{"400cm"},
+			false,
+		},
+		{
+			"height",
+			args{"77in"},
 			false,
 		},
 	}

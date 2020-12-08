@@ -42,6 +42,9 @@ func checkYear(test string, min, max int64) bool {
 func checkHeight(text string) bool {
 	re := regexp.MustCompile("(?m)(\\d+)(cm|in)")
 	match := re.FindStringSubmatch(text)
+	if match == nil {
+		return false
+	}
 	fmt.Printf("%+v\n", match)
 	h, err := strconv.ParseInt(match[1], 10, 64)
 	if err != nil {
@@ -74,7 +77,7 @@ func checkEye(text string) bool {
 }
 
 func checkPid(text string) bool {
-	pattern := "^#[0-9]{9}$"
+	pattern := "^[0-9]{9}$"
 	match, _ := regexp.MatchString(pattern, text)
 	return match
 }
@@ -90,13 +93,15 @@ func (p passport) ok() bool {
 }
 
 func (p passport) ok2() bool {
-	fmt.Printf("%t %t %t %t %t %t %t", checkYear(p.fields["byr"], 1920, 2002),
-		checkYear(p.fields["iyr"], 2010, 2020),
-		checkYear(p.fields["eyr"], 2020, 2030),
-		checkHeight(p.fields["hgt"]),
-		checkHair(p.fields["hcl"]),
-		checkEye(p.fields["ecl"]),
-		checkPid(p.fields["pid"]))
+	/*
+		fmt.Printf("%t %t %t %t %t %t %t", checkYear(p.fields["byr"], 1920, 2002),
+			checkYear(p.fields["iyr"], 2010, 2020),
+			checkYear(p.fields["eyr"], 2020, 2030),
+			checkHeight(p.fields["hgt"]),
+			checkHair(p.fields["hcl"]),
+			checkEye(p.fields["ecl"]),
+			checkPid(p.fields["pid"]))
+	*/
 	return checkYear(p.fields["byr"], 1920, 2002) &&
 		checkYear(p.fields["iyr"], 2010, 2020) &&
 		checkYear(p.fields["eyr"], 2020, 2030) &&

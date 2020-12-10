@@ -1,6 +1,8 @@
 package main
 
-import "testing"
+import (
+	"testing"
+)
 
 /*
 
@@ -51,6 +53,31 @@ func Test_checkTargetSum(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := checkTargetSum(tt.args.target, tt.args.pool); got != tt.want {
 				t.Errorf("checkTargetSum() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_sumStack(t *testing.T) {
+	type args struct {
+		s []int
+	}
+	tests := []struct {
+		name string
+		args args
+		want int
+	}{
+		{
+			"first test",
+			args{[]int{3, 4, 7, 88}},
+			102,
+		},
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := sumStack(tt.args.s); got != tt.want {
+				t.Errorf("sumStack() = %v, want %v", got, tt.want)
 			}
 		})
 	}

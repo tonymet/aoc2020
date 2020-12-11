@@ -49,31 +49,6 @@ func findChains(records recordType) map[int]int {
 	return deltaMap
 }
 
-/*
-func countVariants(records) int64 {
-	count int64
-	// check if next is +3
-	// multiply by 1
-	// skip ahead + 3
-	// multiply by 8?
-
-	// divide into chunks with 3-wide gaps
-	// for
-
-}
-*/
-
-func goodChain(records recordType) bool {
-	// copy chain
-	// nested loop
-	for i, prev := 1, 0; i < len(records); prev, i = i, i+1 {
-		if records[i]-records[prev] > 3 {
-			return false
-		}
-	}
-	return true
-}
-
 func genCounts(records recordType) int {
 
 	// setup
@@ -97,19 +72,6 @@ func genCounts(records recordType) int {
 	fmt.Printf("max: %d\n", max)
 	return trackCounts[max]
 }
-
-/*
-
-func countVariants(records recordType) {
-	// l, r at 0
-	// r increment until r+1 has 3 gap
-	// len of l to R = # combinations
-	// # of chains * length of chains
-
-	for i
-
-}
-*/
 
 func main() {
 	records, _ := scanFile()

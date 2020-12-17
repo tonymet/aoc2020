@@ -23,21 +23,26 @@ type numRecorder struct {
 	counts map[int]int
 }
 
-func (nr *numRecorder) up(num int) {
+func (nr *numRecorder) up(num int) int {
 	nr.order = append(nr.order, num)
+	prev := nr.latest[num]
 	nr.latest[num] = len(nr.order) - 1
 	nr.counts[num]++
+	return prev
 }
 
 func (nr *numRecorder) play() {
+
+	var prev = 0
 	for i := len(nr.order) - 1; i < endIndex; i++ {
 		cur := nr.order[i]
+		//fmt.Printf("counts: %d,  latest:%d\n", nr.counts[cur], nr.latest[cur])
 		if c, ok := nr.counts[cur]; ok && c == 1 {
-			nr.up(0)
+			prev = nr.up(0)
 		} else if ok && c > 1 {
-			nr.up(i - nr.latest[cur])
+			prev = nr.up(i - prev)
 		} else {
-			nr.up(0)
+			panic("not here")
 		}
 	}
 }
@@ -66,5 +71,7 @@ func scanFile() numRecorder {
 func main() {
 	nr := scanFile()
 	nr.play()
-	fmt.Printf("%+v\n", nr)
+	//fmt.Printf("%+v\n", nr)
+	fmt.Printf("order: %+v\n", nr.order)
+	fmt.Printf("2020: %d\n", nr.order[endIndex])
 }

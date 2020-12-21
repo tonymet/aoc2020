@@ -14,15 +14,24 @@ type highLow struct {
 	low, high int
 }
 
+type highLowDef []highLow
+
+func (hd highLowDef) inRange(v int) bool {
+	return (v >= hd[0].low && v <= hd[0].high) ||
+		(v >= hd[1].low && v <= hd[1].high)
+
+}
+
 type ticketFile struct {
-	defs     map[string][]highLow
-	myTicket []int
-	tickets  [][]int
+	defs           map[string]highLowDef
+	myTicket       []int
+	tickets        [][]int
+	validPositions map[int]map[string]bool
 }
 
 func scanFile() (ticketFile, error) {
 	var tf ticketFile
-	tf.defs = make(map[string][]highLow)
+	tf.defs = make(map[string]highLowDef)
 	tf.tickets = make([][]int, 0)
 
 	modes := []string{"def", "header", "myticket", "header", "tickets"}
@@ -58,6 +67,32 @@ func (tf *ticketFile) readTicket(line string) []int {
 		r = append(r, int(i))
 	}
 	return r
+}
+
+func (tf *ticketFile) part2() {
+	// iterate over tickets
+	// for each value that's appropriate for the defs, add it to the position
+	tf.validPositions = make(map[int]map[string]bool)
+
+	for _, t := range tf.tickets {
+		if len(tf.invalidValues(t)) > 0 {
+			continue
+		}
+		for i, v := range t {
+			// append matching key
+			tf.validPositions[i] = make(map[string]bool)
+			for k, hl := range tf.defs {
+				//validPositions
+				if hl.inRange(v) {
+					tf.validPositions[i][k] = true
+				}
+			}
+		}
+	}
+	for k, v := range tf.validPositions {
+		fmt.Printf("index: %d\n", k)
+		fmt.Printf("validPositions :%d\n", len(v))
+	}
 }
 
 func (tf *ticketFile) part1() {
@@ -99,8 +134,7 @@ func (tf *ticketFile) invalidValues(t ticketType) ticketType {
 outer:
 	for _, v := range t {
 		for _, highLowSlice := range tf.defs {
-			if (v >= highLowSlice[0].low && v <= highLowSlice[0].high) ||
-				(v >= highLowSlice[1].low && v <= highLowSlice[1].high) {
+			if highLowSlice.inRange(v) {
 				continue outer
 			}
 		}
@@ -112,5 +146,6 @@ outer:
 func main() {
 	tf, _ := scanFile()
 	tf.part1()
+	tf.part2()
 	//fmt.Printf("%+v \n", tf)
 }

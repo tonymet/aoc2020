@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"strconv"
@@ -47,7 +48,7 @@ func (nr *numRecorder) play() {
 	}
 }
 
-const endIndex = 2020 - 1
+var endIndex = 2020 - 1
 
 func scanFile() numRecorder {
 	nr := numRecorder{make([]int, 0), make(map[int]int), make(map[int]int)}
@@ -69,9 +70,13 @@ func scanFile() numRecorder {
 }
 
 func main() {
+	endIndexArg := flag.Int("n", 2020, "1 or 2")
+	flag.Parse()
+	endIndex = *endIndexArg - 1
+
 	nr := scanFile()
 	nr.play()
 	//fmt.Printf("%+v\n", nr)
-	fmt.Printf("order: %+v\n", nr.order)
+	//fmt.Printf("order: %+v\n", nr.order)
 	fmt.Printf("2020: %d\n", nr.order[endIndex])
 }

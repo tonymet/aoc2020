@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+type ticketType []int
+
 type highLow struct {
 	low, high int
 }
@@ -58,6 +60,22 @@ func (tf *ticketFile) readTicket(line string) []int {
 	return r
 }
 
+func (tf *ticketFile) part1() {
+	c := 0
+	for _, t := range tf.tickets {
+		invalid := tf.invalidValues(t)
+		if len(invalid) == 0 {
+			continue
+		}
+		if len(invalid) > 1 {
+			panic("long")
+		}
+		c += invalid[0]
+		fmt.Printf("%+v\n", invalid)
+	}
+	fmt.Printf("sum: %d", c)
+}
+
 func (tf *ticketFile) readDef(line string) {
 	chunks := strings.Split(line, ": ")
 	if len(chunks) < 2 {
@@ -76,8 +94,23 @@ func (tf *ticketFile) readDef(line string) {
 	return
 }
 
+func (tf *ticketFile) invalidValues(t ticketType) ticketType {
+	r := make(ticketType, 0)
+outer:
+	for _, v := range t {
+		for _, highLowSlice := range tf.defs {
+			if (v >= highLowSlice[0].low && v <= highLowSlice[0].high) ||
+				(v >= highLowSlice[1].low && v <= highLowSlice[1].high) {
+				continue outer
+			}
+		}
+		r = append(r, v)
+	}
+	return r
+}
+
 func main() {
 	tf, _ := scanFile()
-	fmt.Printf("%+v \n", tf)
-
+	tf.part1()
+	//fmt.Printf("%+v \n", tf)
 }

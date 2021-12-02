@@ -59,7 +59,7 @@ func (idx *indexType) matchAndRemove() {
 	allCandidates := make(map[string]bool)
 	for _, a := range idx.algRank {
 		lines := idx.algToLine[a]
-		fmt.Printf("alg: %s, lines: %d\n", a, len(lines))
+		//fmt.Printf("alg: %s, lines: %d\n", a, len(lines))
 		candidateIng := make(map[string]int)
 		// add all ingredient, eliminate missing
 		for _, l := range lines {
@@ -187,7 +187,7 @@ func scanFile() {
 	sort.Sort(sortByRank{&idx.algRank, idx.algToLine})
 
 	// go by alg rank, find ing with matching list and then remove
-	fmt.Printf("idx: %+v\n", idx)
+	//fmt.Printf("idx: %+v\n", idx)
 	idx.matchAndRemove()
 }
 

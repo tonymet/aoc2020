@@ -7,10 +7,10 @@ import (
 )
 
 func slidingSum(page []int) int {
-	if (page[0] + page[1] + page[2]) > (page[1] + page[2] + page[3]) {
-		return -1
-	} else if (page[0] + page[1] + page[2]) < (page[1] + page[2] + page[3]) {
+	if page[3] > page[0] {
 		return 1
+	} else if page[0] > page[3] {
+		return -1
 	}
 	return 0
 }

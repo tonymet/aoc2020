@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"os"
 )
 
 func slidingSum(page []int) int {
@@ -52,5 +53,10 @@ func part1() {
 	}
 }
 func main() {
-	part2()
+	switch os.Getenv("PART") {
+	case "2":
+		part2()
+	default:
+		part1()
+	}
 }

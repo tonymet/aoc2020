@@ -11,6 +11,29 @@ type threed struct {
 }
 
 func part2() {
+	var (
+		dir string
+		val int
+		aim threed
+		pos threed
+	)
+
+	for _, err := fmt.Scanf("%s %d\n", &dir, &val); err != io.EOF; _, err = fmt.Scanf("%s %d\n", &dir, &val) {
+		switch dir {
+		case "forward":
+			pos.z += val
+			pos.y += val * aim.y
+		case "down":
+			aim.y -= val
+		case "up":
+			aim.y += val
+		default:
+			panic("out of bounds:")
+		}
+		fmt.Printf("aim : %+v, pos: %+v\n", aim, pos)
+	}
+	fmt.Printf("solution : %d\n", pos.y*-1*pos.z)
+
 }
 func part1() {
 	var (

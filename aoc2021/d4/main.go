@@ -9,9 +9,15 @@ import (
 
 var bingoNumbers []int
 var bingoLookup = map[int][]boardRowCol{}
+var boards [100]*tBoard
 
 type tBoard = [5][5]int
 type tBoardPtr = *[5][5]int
+
+type tWinner = struct {
+	board *tBoard
+	num   int
+}
 
 type boardRowCol struct {
 	boardRowCol *[5]int
@@ -65,9 +71,46 @@ func part3() {
 }
 
 func part2() {
+	// play the game
+	//var bingoWinners = make([]tWinner, 0)
+	parseAndSetup()
 
+	// index all boards
+	// we will remove the seen ones
+	bingoBoards := make(map[*tBoard]bool)
+	for _, board := range boards {
+		bingoBoards[board] = false
+	}
+	for _, num := range bingoNumbers {
+		for _, rowCol := range bingoLookup[num] {
+			// skip the completed cards
+			if _, ok := bingoBoards[rowCol.board]; !ok {
+				continue
+			}
+			rowColRecord := rowCol.boardRowCol
+			fmt.Printf("num: %+v, rowCol: %+v\n", num, rowCol)
+			// find index
+			if index, err := indexOf(*rowColRecord, num); err == nil {
+				rowColRecord[index] = -1
+			} else {
+				panic("index num not found")
+			}
+
+			// check bingo
+			if bingoTest(*rowColRecord) {
+				fmt.Printf("Bingo: %+v, solution: %+v\n", rowCol.board, part1Solution(*rowCol.board, num))
+				// remove the board
+				delete(bingoBoards, rowCol.board)
+				if len(bingoBoards) == 0 {
+					fmt.Printf("FINAL Bingo: %+v, solution: %+v\n", rowCol.board, part1Solution(*rowCol.board, num))
+					return
+				}
+			}
+		}
+	}
 }
-func part1() {
+
+func parseAndSetup() {
 	for {
 		var cur int
 		n, err := fmt.Scanf("%d,", &cur)
@@ -85,7 +128,6 @@ func part1() {
 	fmt.Scanf("\n")
 
 	var i, x, y int
-	var boards [100]*tBoard
 boards:
 	for {
 		var curBoard tBoard
@@ -113,7 +155,11 @@ boards:
 		// read off blank line
 		fmt.Scanf("\n")
 	}
+}
+func part1() {
 	// play the game
+	//var bingoWinners = make([]tWinner, 0)
+	parseAndSetup()
 	for _, num := range bingoNumbers {
 		for _, rowCol := range bingoLookup[num] {
 			rowColRecord := rowCol.boardRowCol

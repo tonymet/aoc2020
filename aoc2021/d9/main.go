@@ -11,6 +11,8 @@ type twod struct {
 	x, y int
 }
 
+type callback = func(x, y int)
+
 type seenType = map[twod]bool
 
 const (
@@ -53,20 +55,13 @@ func part2() {
 	// find low points
 	// calc basins
 	// part2 sum
-	for y := 0; y <= maxY; y++ {
-		for x := 0; x <= maxX; x++ {
-			// test and add sum
-			if isLowest(x, y) {
-				// calc basin
-				seen := make(seenType)
-				basinSizes = append(basinSizes, countBasinFrom(x, y, seen))
-			}
-		}
-	}
+	iterGrid(func(x, y int) {
+		seen := make(seenType)
+		basinSizes = append(basinSizes, countBasinFrom(x, y, seen))
+	})
 	fmt.Printf("part2Sum: %d\n", part2Sum(basinSizes))
 }
 
-// tue =
 func isLowest(x, y int) bool {
 	cmp := grid[y][x]
 	up, down, left, right := twod{x, y - 1}, twod{x, y + 1}, twod{x - 1, y}, twod{x + 1, y}
@@ -105,19 +100,26 @@ file:
 	}
 
 }
-func part1() {
-	parseAndSetup()
-	var part1Sum int
-	// iterate over both
+
+// iterate over grid and yield to callback if isLowest() == true
+func iterGrid(cb callback) {
 	for y := 0; y <= maxY; y++ {
 		for x := 0; x <= maxX; x++ {
 			// test and add sum
 			if isLowest(x, y) {
-				fmt.Printf("lowest  (x, y ,val): (%d, %d, %d)\n", x, y, grid[y][x])
-				part1Sum += grid[y][x] + 1
+				cb(x, y)
 			}
 		}
 	}
+}
+func part1() {
+	parseAndSetup()
+	var part1Sum int
+	// iterate over both
+	iterGrid(func(x, y int) {
+		fmt.Printf("lowest  (x, y ,val): (%d, %d, %d)\n", x, y, grid[y][x])
+		part1Sum += grid[y][x] + 1
+	})
 	fmt.Printf("\nisLower (1,0) %+x\n", isLowest(1, 0))
 	fmt.Printf("\nisLower (9,0) %+x\n", isLowest(9, 0))
 	fmt.Printf("part1Sum: %d\n", part1Sum)

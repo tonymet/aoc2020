@@ -11,6 +11,8 @@ type twod struct {
 	x, y int
 }
 
+type seenType = map[twod]bool
+
 const (
 	//maxX, maxY = 9, 4
 	maxX, maxY = 99, 99
@@ -21,7 +23,7 @@ var (
 	//mask [maxY + 1][maxX + 1]bool
 )
 
-func countBasinFrom(x, y int, seen map[twod]bool) int {
+func countBasinFrom(x, y int, seen seenType) int {
 	if x < 0 || x > maxX || y < 0 || y > maxY || grid[y][x] == 9 {
 		return 0
 	}
@@ -56,7 +58,7 @@ func part2() {
 			// test and add sum
 			if isLowest(x, y) {
 				// calc basin
-				seen := make(map[twod]bool)
+				seen := make(seenType)
 				basinSizes = append(basinSizes, countBasinFrom(x, y, seen))
 			}
 		}

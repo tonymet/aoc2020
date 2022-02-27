@@ -16,8 +16,8 @@ type callback = func(x, y int)
 type seenType = map[twod]bool
 
 const (
-	//maxX, maxY = 9, 4
-	maxX, maxY = 99, 99
+	maxX, maxY = 9, 4
+	//maxX, maxY = 99, 99
 )
 
 var (
@@ -90,15 +90,13 @@ file:
 		case err == io.EOF:
 			break file
 		case n == 0:
+			y++
+			x = 0
 			continue file
 		}
 		grid[y][x] = cur
-		x = (x + 1) % (maxX + 1)
-		if x == 0 {
-			y++
-		}
+		x++
 	}
-
 }
 
 // iterate over grid and yield to callback if isLowest() == true

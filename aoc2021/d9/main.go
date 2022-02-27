@@ -16,8 +16,8 @@ type callback = func(x, y int)
 type seenType = map[twod]bool
 
 const (
-	maxX, maxY = 9, 4
-	//maxX, maxY = 99, 99
+	//maxX, maxY = 9, 4
+	maxX, maxY = 99, 99
 )
 
 var (

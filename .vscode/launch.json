@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "[GO] Launch Active File",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${file}",
+            "env": {"PART": "1", "STDIN": "${fileDirname}/data/test1input.txt"},
+            //"env": {"PART": "2", "STDIN": "${fileDirname}/data/input.txt"},
+            //"args" : ["-r", "[stdin:${fileDirname}/data/input.txt]"],
+            "showLog": true
+        }
+    ]
+}

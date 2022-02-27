@@ -83,6 +83,48 @@ func part1() {
 		//part1Sum += grid[y][x] + 1
 	})
 	fmt.Printf("%+v\n", grid)
+	step()
+	fmt.Printf("%+v\n", grid)
+
+}
+
+func increaseNeighbors(pos twod) {
+	/*
+		up, down, left, right, ul, ur, bl, br := twod{x, y - 1}, twod{x, y + 1}, twod{x - 1, y},
+			twod{x + 1, y}, twod{x - 1, y - 1}, twod{x + 1, y - 1}, twod{x - 1, y + 1}, twod{x + 1, y + 1}
+	*/
+	/*
+		for _, v := range []twod{up, down, left, right, ul, ur, bl, br} {
+			grid[v.y][v.x] += 1
+		}
+	*/
+	for y := pos.y - 1; y <= pos.y+1; y++ {
+		for x := pos.x - 1; x <= pos.x+1; x++ {
+			// skip cur
+			if pos == (twod{x, y}) || y < 0 || x < 0 || y > maxY || x > maxX {
+				continue
+			}
+			grid[y][x]++
+		}
+	}
+}
+
+func step() {
+	// iterate over grid
+	// if < 9, increase by 1
+	// if == 9 , increase neighbors by 1, then set self to zero
+	// if zero , stop
+
+	// increaseO
+	for y := 0; y <= maxY; y++ {
+		for x := 0; x <= maxX; x++ {
+			grid[y][x] += 1
+			if grid[y][x] >= 9 && grid[y][x] != 0 {
+				increaseNeighbors(twod{x, y})
+				grid[y][x] = 0
+			}
+		}
+	}
 
 }
 func main() {

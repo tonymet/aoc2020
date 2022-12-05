@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "${file}",
-            "env": {"PART": "1", "STDIN": "${fileDirname}/data/test-input.txt"},
+            "env": {"PART": "2", "STDIN": "${fileDirname}/data/testinput.txt"},
             //"env": {"PART": "2", "STDIN": "${fileDirname}/data/input.txt"},
             //"args" : ["-r", "[stdin:${fileDirname}/data/input.txt]"],
             "showLog": true

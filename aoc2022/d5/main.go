@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
@@ -8,9 +9,9 @@ import (
 )
 
 // bounds for the tower b/c we are streaming the file
-const (
-	WIDTH  int = 9
-	HEIGHT int = 8
+var (
+	WIDTH  *int
+	HEIGHT *int
 )
 
 type towersTypeA = [][]byte
@@ -32,6 +33,9 @@ func push(t *towerTypeA, e byte) {
 
 func printTops(t towersTypeA) {
 	for _, eachTower := range t {
+		if len(eachTower) == 0 {
+			panic("eachTower is empty")
+		}
 		fmt.Print(string(eachTower[len(eachTower)-1]))
 	}
 	fmt.Print("\n")
@@ -47,6 +51,20 @@ func (ts *towersClass) move(n, f, t int) {
 	}
 }
 
+func (ts *towersClass) move2(n, f, t int) {
+	// move to temporary , reverse and then push
+	tmp := make([]byte, 0)
+	for i := 0; i < n; i++ {
+		if len(ts.towerStorage[f]) == 0 {
+			panic("from is empty")
+		}
+		e := pop(&ts.towerStorage[f])
+		tmp = append(tmp, e)
+	}
+	slices.Reverse(tmp)
+	ts.towerStorage[t] = append(ts.towerStorage[t], tmp...)
+}
+
 // utilities for parsing the tower into data structures
 func keep(index int) bool {
 	return ((index - 1) % 4) == 0
@@ -59,13 +77,11 @@ func isLetter(l byte) bool {
 	return l >= 65 && l <= 90
 }
 
-func part2() {
-}
-func part1() {
+func parseAndSolve() {
 	var b []byte = make([]byte, 1)
-	var towers [][]byte = make(towersTypeA, WIDTH)
-	for i := 0; i < WIDTH; i++ {
-		towers[i] = make(towerType, 0, HEIGHT)
+	var towers [][]byte = make(towersTypeA, *WIDTH)
+	for i := 0; i < *WIDTH; i++ {
+		towers[i] = make(towerType, 0, *HEIGHT)
 	}
 	var aTower towersClass
 	var row, col int
@@ -109,15 +125,30 @@ func part1() {
 		moves = append(moves, cur)
 	}
 
-	// perform the moves
-	for _, m := range moves {
-		aTower.move(m[0], m[1]-1, m[2]-1)
+	switch os.Getenv("PART") {
+	case "2":
+		for _, m := range moves {
+			aTower.move2(m[0], m[1]-1, m[2]-1)
+		}
+		fmt.Printf("AFTER moves: %+v\n", aTower.towerStorage)
+		printTops(aTower.towerStorage)
+	default:
+		// perform the moves
+		for _, m := range moves {
+			aTower.move(m[0], m[1]-1, m[2]-1)
+		}
+		fmt.Printf("AFTER moves: %+v\n", aTower.towerStorage)
+		printTops(aTower.towerStorage)
 	}
-	fmt.Printf("AFTER moves: %+v\n", aTower.towerStorage)
-	printTops(aTower.towerStorage)
+}
+
+func init() {
+	WIDTH = flag.Int("width", 3, "width")
+	HEIGHT = flag.Int("height", 3, "height")
 }
 
 func main() {
+	flag.Parse()
 	if stdin := os.Getenv("STDIN"); len(stdin) != 0 {
 		stdinFile, err := os.Open(stdin)
 		if err != nil {
@@ -125,10 +156,5 @@ func main() {
 		}
 		os.Stdin = stdinFile
 	}
-	switch os.Getenv("PART") {
-	case "2":
-		part2()
-	default:
-		part1()
-	}
+	parseAndSolve()
 }

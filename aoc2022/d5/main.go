@@ -13,6 +13,33 @@ const (
 	HEIGHT int = 3
 )
 
+type towersTypeA = [][]byte
+type towerTypeA = []byte
+type towerType []byte
+type towersClass struct {
+	towerStorage towersTypeA
+}
+
+func pop(t *towerTypeA) (cur byte) {
+	cur = (*t)[len(*t)-1]
+	(*t) = (*t)[:len(*t)-1]
+	return
+}
+
+func push(t *towerTypeA, e byte) {
+	(*t) = append(*t, e)
+}
+
+func (ts *towersClass) move(n, f, t int) {
+	for i := 0; i < n; i++ {
+		if len(ts.towerStorage[f]) == 0 {
+			panic("from is empty")
+		}
+		e := pop(&ts.towerStorage[f])
+		push(&ts.towerStorage[t], e)
+	}
+}
+
 // utilities for parsing the tower into data structures
 func keep(index int) bool {
 	return ((index - 1) % 4) == 0
@@ -29,10 +56,11 @@ func part2() {
 }
 func part1() {
 	var b []byte = make([]byte, 1)
-	var towers [][]byte = make([][]byte, WIDTH)
+	var towers [][]byte = make(towersTypeA, WIDTH)
 	for i := 0; i < WIDTH; i++ {
-		towers[i] = make([]byte, 0, HEIGHT)
+		towers[i] = make(towerType, 0, HEIGHT)
 	}
+	var aTower towersClass
 	var row, col int
 	for {
 		_, err := os.Stdin.Read(b)
@@ -61,6 +89,7 @@ func part1() {
 		slices.Reverse(towers[i])
 	}
 	fmt.Printf("towers: %+v\n", towers)
+	aTower.towerStorage = towers
 
 	var moves = make([][3]int, 0)
 	var cur [3]int
@@ -72,7 +101,12 @@ func part1() {
 		fmt.Printf("curMove: %+v\n", cur)
 		moves = append(moves, cur)
 	}
-	fmt.Printf("moves: %+v\n", moves)
+
+	// perform the moves
+	for _, m := range moves {
+		aTower.move(m[0], m[1]-1, m[2]-1)
+	}
+	fmt.Printf("AFTER moves: %+v\n", aTower.towerStorage)
 }
 
 func main() {

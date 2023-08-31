@@ -9,8 +9,8 @@ import (
 
 // bounds for the tower b/c we are streaming the file
 const (
-	WIDTH  int = 3
-	HEIGHT int = 3
+	WIDTH  int = 9
+	HEIGHT int = 8
 )
 
 type towersTypeA = [][]byte
@@ -28,6 +28,13 @@ func pop(t *towerTypeA) (cur byte) {
 
 func push(t *towerTypeA, e byte) {
 	(*t) = append(*t, e)
+}
+
+func printTops(t towersTypeA) {
+	for _, eachTower := range t {
+		fmt.Print(string(eachTower[len(eachTower)-1]))
+	}
+	fmt.Print("\n")
 }
 
 func (ts *towersClass) move(n, f, t int) {
@@ -107,6 +114,7 @@ func part1() {
 		aTower.move(m[0], m[1]-1, m[2]-1)
 	}
 	fmt.Printf("AFTER moves: %+v\n", aTower.towerStorage)
+	printTops(aTower.towerStorage)
 }
 
 func main() {

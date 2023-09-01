@@ -1,4 +1,4 @@
-package main
+package d6
 
 import (
 	"flag"

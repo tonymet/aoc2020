@@ -19,7 +19,7 @@
                 "STDIN": "${fileDirname}/data/testinput.txt"
             },
             //"args" : ["-r", "[stdin:${fileDirname}/data/testinput.txt]"],
-            //"showLog": true
+            "showLog": true
         }
     ]
 }

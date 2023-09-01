@@ -1,10 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"os"
 )
+
+var WIDTH *int
 
 type LetterWindow struct {
 	windowScope []byte
@@ -20,7 +23,7 @@ func sumCounts(l map[byte]int) (sum int) {
 }
 
 func testWindow(lw LetterWindow) bool {
-	if len(lw.windowCount) < 4 {
+	if len(lw.windowCount) < *WIDTH {
 		return false
 	}
 	for _, v := range lw.windowCount {
@@ -35,7 +38,7 @@ func parseAndSolve() {
 
 	var lw LetterWindow
 	lw.windowCount = make(map[byte]int)
-	lw.windowScope = make([]byte, 0, 4)
+	lw.windowScope = make([]byte, 0, *WIDTH)
 	b := make([]byte, 1)
 	var row, col int
 	for {
@@ -51,7 +54,7 @@ func parseAndSolve() {
 		}
 		lw.windowCount[b[0]]++
 		lw.windowScope = append(lw.windowScope, b[0])
-		if col >= 3 {
+		if col >= *WIDTH-1 {
 			// test window
 			// if not adequate, update
 			l := lw.windowScope[0]
@@ -66,7 +69,7 @@ func parseAndSolve() {
 					delete(lw.windowCount, l)
 				}
 				lw.windowScope = lw.windowScope[1:]
-				if len(lw.windowScope) != 3 {
+				if len(lw.windowScope) != *WIDTH-1 {
 					panic("windowscope insonsidtent")
 
 				}
@@ -75,7 +78,12 @@ func parseAndSolve() {
 		col++
 	}
 }
+
+func init() {
+	WIDTH = flag.Int("width", 4, "width")
+}
 func main() {
+	flag.Parse()
 	if stdin := os.Getenv("STDIN"); len(stdin) != 0 {
 		stdinFile, err := os.Open(stdin)
 		if err != nil {
@@ -83,6 +91,7 @@ func main() {
 		}
 		os.Stdin = stdinFile
 	}
+	fmt.Printf("Width: %d\n", *WIDTH)
 	parseAndSolve()
 
 }

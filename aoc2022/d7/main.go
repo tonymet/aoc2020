@@ -58,6 +58,14 @@ func init() {
 }
 
 func main() {
+	if stdin := os.Getenv("STDIN"); len(stdin) != 0 {
+		stdinFile, err := os.Open(stdin)
+		if err != nil {
+			panic(err)
+		}
+		os.Stdin = stdinFile
+
+	}
 
 	scanner := bufio.NewScanner(os.Stdin)
 	// optionally, resize scanner's capacity for lines over 64K, see next example
@@ -70,7 +78,10 @@ func main() {
 		switch {
 		case strings.HasPrefix(line, "$ cd"):
 			// handle change of director
-			fmt.Sscanf("$ cd %s", entry.name)
+			entry.name = strings.TrimPrefix(line, "$ cd ")
+			if entry.name == "" {
+				panic("error parsing name")
+			}
 			if entry.name == "/" {
 				cwd.children = append(root.children, &entry)
 				cwd = &entry
@@ -91,6 +102,7 @@ func main() {
 				panic("parsing error -- scanstate")
 			}
 			entry.entryType = TypeDir
+			entry.parent = cwd
 			fmt.Sscanf(line, "dir %s", &entry.name)
 			cwd.children = append(cwd.children, &entry)
 			fmt.Printf("direntry: %+v\n", entry)
@@ -100,6 +112,7 @@ func main() {
 			}
 			fmt.Sscanf(line, "%d %s", &entry.size, &entry.name)
 			entry.entryType = TypeFile
+			entry.parent = cwd
 			cwd.children = append(cwd.children, &entry)
 			fmt.Printf("entry: %+v\n", entry)
 		}

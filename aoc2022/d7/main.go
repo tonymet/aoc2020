@@ -42,6 +42,20 @@ func (e *Entry) cd(name string) (*Entry, error) {
 	return nil, errors.New("child Not found " + name)
 }
 
+func (e Entry) rSize(cutoff int) (sum int) {
+	for _, c := range e.children {
+		switch c.entryType {
+		case TypeDir:
+			sum += c.rSize(cutoff)
+		case TypeFile:
+			sum += c.size
+		default:
+			panic("wrong type")
+		}
+	}
+	return
+}
+
 func newEntry() (n Entry) {
 	n.children = make([]*Entry, 0)
 	return
@@ -55,6 +69,11 @@ func init() {
 	root = newEntry()
 	root.name = "root"
 	root.entryType = TypeDir
+	top := newEntry()
+	top.name = "/"
+	top.entryType = TypeDir
+	top.parent = &root
+	root.children = append(root.children, &top)
 }
 
 func main() {
@@ -81,10 +100,6 @@ func main() {
 			entry.name = strings.TrimPrefix(line, "$ cd ")
 			if entry.name == "" {
 				panic("error parsing name")
-			}
-			if entry.name == "/" {
-				cwd.children = append(root.children, &entry)
-				cwd = &entry
 			} else {
 				var err error
 				if cwd, err = cwd.cd(entry.name); err != nil {
@@ -117,7 +132,9 @@ func main() {
 			fmt.Printf("entry: %+v\n", entry)
 		}
 	}
-	fmt.Printf("DirTree: %+v\n", root)
+	fmt.Printf("DirTree: %+v\n", root.children[0].children[0])
+	fmt.Printf("rsize a: %d\n", root.children[0].children[0].rSize(0))
+	fmt.Printf("rsize d: %d\n", root.children[0].children[3].rSize(0))
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)

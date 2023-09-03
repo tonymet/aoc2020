@@ -42,7 +42,7 @@ func (e *Entry) cd(name string) (*Entry, error) {
 	return nil, errors.New("child Not found " + name)
 }
 
-func (e Entry) rSize(cutoff int) (sum int) {
+func (e *Entry) rSize(cutoff int) (sum int) {
 	for _, c := range e.children {
 		switch c.entryType {
 		case TypeDir:
@@ -53,6 +53,20 @@ func (e Entry) rSize(cutoff int) (sum int) {
 			panic("wrong type")
 		}
 	}
+	if e.entryType == TypeDir {
+		e.size = sum
+		if sum <= cutoff {
+			fmt.Printf("adding dirsize %s\n", e.name)
+			dirSizes = append(dirSizes, e)
+		}
+	}
+	return
+}
+
+func sumSizes(d []*Entry) (sum int) {
+	for _, e := range d {
+		sum += e.size
+	}
 	return
 }
 
@@ -62,7 +76,8 @@ func newEntry() (n Entry) {
 }
 
 var (
-	root Entry
+	root     Entry
+	dirSizes []*Entry
 )
 
 func init() {
@@ -74,6 +89,7 @@ func init() {
 	top.entryType = TypeDir
 	top.parent = &root
 	root.children = append(root.children, &top)
+	dirSizes = make([]*Entry, 0)
 }
 
 func main() {
@@ -132,9 +148,10 @@ func main() {
 			fmt.Printf("entry: %+v\n", entry)
 		}
 	}
-	fmt.Printf("DirTree: %+v\n", root.children[0].children[0])
-	fmt.Printf("rsize a: %d\n", root.children[0].children[0].rSize(0))
-	fmt.Printf("rsize d: %d\n", root.children[0].children[3].rSize(0))
+	fmt.Printf("DirTree: %+v\n", root.children[0])
+	fmt.Printf("DirTree: %+v\n", root.rSize(100000))
+	fmt.Printf("DirSizes: %+v\n", dirSizes)
+	fmt.Printf("sumSizes %d\n", sumSizes(dirSizes))
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)

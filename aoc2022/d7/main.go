@@ -6,12 +6,17 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 	"strings"
 )
 
 const (
 	TypeDir int = iota
 	TypeFile
+)
+const (
+	MAXSIZE    = 70000000
+	NEEDEDSIZE = 30000000
 )
 
 const (
@@ -57,8 +62,9 @@ func (e *Entry) rSize(cutoff int) (sum int) {
 		e.size = sum
 		if sum <= cutoff {
 			fmt.Printf("adding dirsize %s\n", e.name)
-			dirSizes = append(dirSizes, e)
+			dirSizesP1 = append(dirSizesP1, e)
 		}
+		dirSizesP2 = append(dirSizesP2, e.size)
 	}
 	return
 }
@@ -76,8 +82,9 @@ func newEntry() (n Entry) {
 }
 
 var (
-	root     Entry
-	dirSizes []*Entry
+	root       Entry
+	dirSizesP1 []*Entry
+	dirSizesP2 []int
 )
 
 func init() {
@@ -89,7 +96,8 @@ func init() {
 	top.entryType = TypeDir
 	top.parent = &root
 	root.children = append(root.children, &top)
-	dirSizes = make([]*Entry, 0)
+	dirSizesP1 = make([]*Entry, 0)
+	dirSizesP2 = make([]int, 0)
 }
 
 func main() {
@@ -149,9 +157,24 @@ func main() {
 		}
 	}
 	fmt.Printf("DirTree: %+v\n", root.children[0])
-	fmt.Printf("DirTree: %+v\n", root.rSize(100000))
-	fmt.Printf("DirSizes: %+v\n", dirSizes)
-	fmt.Printf("sumSizes %d\n", sumSizes(dirSizes))
+	rootSize := root.children[0].rSize(100000)
+	freeSize := MAXSIZE - rootSize
+	searchSize := NEEDEDSIZE - freeSize
+	fmt.Printf("rootSize: %d, freeSize = %d, searchSize: %d\n", rootSize, freeSize, searchSize)
+	//fmt.Printf("DirTree: %+v\n", root.rSize(100000))
+	fmt.Printf("DirSizes: %+v\n", dirSizesP1)
+	fmt.Printf("sumSizes %d\n", sumSizes(dirSizesP1))
+	slices.Sort(dirSizesP2)
+	//slices.Reverse(dirSizesP2)
+	fmt.Printf("DirSizesP2: %+v\n", dirSizesP2)
+	var keepSize int
+	for _, s := range dirSizesP2 {
+		if s >= searchSize {
+			keepSize = s
+			break
+		}
+	}
+	fmt.Printf("keepSize: %+v\n", keepSize)
 
 	if err := scanner.Err(); err != nil {
 		log.Fatal(err)

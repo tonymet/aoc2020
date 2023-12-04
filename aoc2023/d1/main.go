@@ -8,6 +8,28 @@ import (
 	"strings"
 )
 
+var part = 1
+
+var numMap = map[string]string{
+	"zero":  "0o",
+	"one":   "o1e",
+	"two":   "t2o",
+	"three": "t3e",
+	"four":  "4",
+	"five":  "5e",
+	"six":   "6",
+	"seven": "7n",
+	"eight": "e8t",
+	"nine":  "n9e",
+}
+
+func replaceNumsInString(s string) string {
+	for k := range numMap {
+		s = strings.Replace(s, k, numMap[k], -1)
+	}
+	return s
+}
+
 func part1() {
 	// var cur, i int
 	var curLine string
@@ -19,6 +41,7 @@ func part1() {
 			break
 		}
 		// fmt.Printf("line = %s\n", curLine)
+		curLine = replaceNumsInString(curLine)
 		var l, r int
 		for l = 0; l <= len(curLine)-1; l++ {
 			if curLine[l] >= '0' && curLine[l] <= '9' {
@@ -48,9 +71,17 @@ func part1() {
 	fmt.Printf("sum: %d\n", sum)
 }
 func main() {
+	if stdin := os.Getenv("STDIN"); len(stdin) != 0 {
+		stdinFile, err := os.Open(stdin)
+		if err != nil {
+			panic(err)
+		}
+		os.Stdin = stdinFile
+	}
 	switch os.Getenv("PART") {
 	case "2":
-		// part2()
+		part = 2
+		fallthrough
 	default:
 		part1()
 	}

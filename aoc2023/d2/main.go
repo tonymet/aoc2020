@@ -34,6 +34,26 @@ func possibleGame(g game) bool {
 	return true
 }
 
+func maxHand(g game) (r hand) {
+
+	for _, h := range g.hands {
+		if h.r > r.r {
+			r.r = h.r
+		}
+		if h.b > r.b {
+			r.b = h.b
+		}
+		if h.g > r.g {
+			r.g = h.g
+		}
+	}
+	return
+}
+
+func power(h hand) int {
+	return h.r * h.b * h.g
+}
+
 func part1() {
 
 	var reGame = regexp.MustCompile(`^Game (\d+):`)
@@ -41,6 +61,7 @@ func part1() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 	var total int
+	var total2 int
 	for scanner.Scan() {
 		curLine := scanner.Text()
 		var curGame game
@@ -78,11 +99,15 @@ func part1() {
 		}
 		fmt.Printf("curGame: %+x\n", curGame)
 		fmt.Printf("curGame possible: %t\n", possibleGame(curGame))
+		maxHandValue := maxHand(curGame)
+		fmt.Printf("maxHand possible: %x\n", maxHandValue)
 		if possibleGame(curGame) {
 			total += curGame.id
 		}
+		total2 += power(maxHandValue)
 	}
 	fmt.Printf("total : %d\n", total)
+	fmt.Printf("total p2 : %d\n", total2)
 
 }
 

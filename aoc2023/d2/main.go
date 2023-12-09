@@ -13,11 +13,25 @@ var part = 1
 
 type game struct {
 	hands []hand
-	i     int
+	id    int
 }
 
 type hand struct {
 	r, b, g int
+}
+
+var bounds = hand{
+	12, 14, 13,
+}
+
+func possibleGame(g game) bool {
+	for _, h := range g.hands {
+		if h.r > bounds.r || h.b > bounds.b || h.g > bounds.g {
+			return false
+		}
+	}
+
+	return true
 }
 
 func part1() {
@@ -26,6 +40,7 @@ func part1() {
 	var reColor = regexp.MustCompile(`(?m)(\d+) (\w+)`)
 
 	scanner := bufio.NewScanner(os.Stdin)
+	var total int
 	for scanner.Scan() {
 		curLine := scanner.Text()
 		var curGame game
@@ -36,7 +51,7 @@ func part1() {
 			panic(err)
 		} else {
 			fmt.Printf("game : %d\n", i)
-			curGame.i = int(i)
+			curGame.id = int(i)
 		}
 		start := strings.IndexAny(curLine, ":")
 		rest := curLine[start+2:]
@@ -62,7 +77,13 @@ func part1() {
 			curGame.hands = append(curGame.hands, curHand)
 		}
 		fmt.Printf("curGame: %+x\n", curGame)
+		fmt.Printf("curGame possible: %t\n", possibleGame(curGame))
+		if possibleGame(curGame) {
+			total += curGame.id
+		}
 	}
+	fmt.Printf("total : %d\n", total)
+
 }
 
 func main() {

@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-var part = 1
-
 type game struct {
 	hands []hand
 	id    int
@@ -34,18 +32,18 @@ func possibleGame(g game) bool {
 	return true
 }
 
-func maxHand(g game) (r hand) {
+func maxInt(i, j int) int {
+	if i > j {
+		return i
+	}
+	return j
+}
 
+func maxHand(g game) (r hand) {
 	for _, h := range g.hands {
-		if h.r > r.r {
-			r.r = h.r
-		}
-		if h.b > r.b {
-			r.b = h.b
-		}
-		if h.g > r.g {
-			r.g = h.g
-		}
+		r.r = maxInt(h.r, r.r)
+		r.b = maxInt(h.b, r.b)
+		r.g = maxInt(h.g, r.g)
 	}
 	return
 }
@@ -55,17 +53,12 @@ func power(h hand) int {
 }
 
 func part1() {
-
-	var reGame = regexp.MustCompile(`^Game (\d+):`)
-	var reColor = regexp.MustCompile(`(?m)(\d+) (\w+)`)
-
+	var reGame, reColor = regexp.MustCompile(`^Game (\d+):`), regexp.MustCompile(`(?m)(\d+) (\w+)`)
 	scanner := bufio.NewScanner(os.Stdin)
-	var total int
-	var total2 int
+	var total, total2 int
 	for scanner.Scan() {
 		curLine := scanner.Text()
-		var curGame game
-		curGame.hands = make([]hand, 0)
+		var curGame = game{make([]hand, 0), 0}
 
 		matches := reGame.FindStringSubmatch(curLine)
 		if i, err := strconv.ParseInt(matches[1], 10, 64); err != nil {
@@ -75,8 +68,7 @@ func part1() {
 			curGame.id = int(i)
 		}
 		start := strings.IndexAny(curLine, ":")
-		rest := curLine[start+2:]
-		hands := strings.Split(rest, ";")
+		hands := strings.Split(curLine[start+2:], ";")
 
 		for _, h := range hands {
 			colors := reColor.FindAllStringSubmatch(h, -1)
@@ -108,7 +100,6 @@ func part1() {
 	}
 	fmt.Printf("total : %d\n", total)
 	fmt.Printf("total p2 : %d\n", total2)
-
 }
 
 func main() {
@@ -121,7 +112,6 @@ func main() {
 	}
 	switch os.Getenv("PART") {
 	case "2":
-		part = 2
 		fallthrough
 	default:
 		part1()

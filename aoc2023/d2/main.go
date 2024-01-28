@@ -59,7 +59,6 @@ func part1() {
 	for scanner.Scan() {
 		curLine := scanner.Text()
 		var curGame = game{make([]hand, 0), 0}
-
 		matches := reGame.FindStringSubmatch(curLine)
 		if i, err := strconv.ParseInt(matches[1], 10, 64); err != nil {
 			panic(err)
@@ -69,7 +68,6 @@ func part1() {
 		}
 		start := strings.IndexAny(curLine, ":")
 		hands := strings.Split(curLine[start+2:], ";")
-
 		for _, h := range hands {
 			colors := reColor.FindAllStringSubmatch(h, -1)
 			var curHand hand

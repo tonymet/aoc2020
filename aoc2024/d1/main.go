@@ -4,8 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	_ "math"
-	_ "os"
 	"sort"
 )
 
@@ -17,7 +15,29 @@ func Abs(x int) int {
 }
 
 func part2() {
-	fmt.Printf("part2 not implemented\n")
+	var l, r int
+	lcol, rmap := make([]int, 0), make(map[int]int, 0)
+
+	for {
+		_, err := fmt.Scanf("%d %d", &l, &r)
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			panic(err)
+		}
+		lcol = append(lcol, l)
+		rmap[r] += 1
+	}
+	// calculate lookup
+	sum := 0
+	for _, e := range lcol {
+		v, ok := rmap[e]
+		if !ok {
+			v = 0
+		}
+		sum += e * v
+	}
+	fmt.Printf("sum: %d\n", sum)
 }
 
 func part1() {
@@ -32,13 +52,12 @@ func part1() {
 		}
 		lcol = append(lcol, l)
 		rcol = append(rcol, r)
-		fmt.Printf("l: %d, r%d\n", l, r)
 	}
 	// sort both
 	sort.Ints(lcol)
 	sort.Ints(rcol)
 	sum := 0
-	for i, _ := range lcol {
+	for i := range lcol {
 		sum += Abs(lcol[i] - rcol[i])
 	}
 	fmt.Printf("sum: %d\n", sum)

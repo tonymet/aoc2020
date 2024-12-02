@@ -12,8 +12,14 @@ func part2() {
 	fmt.Printf("part2 not implemented\n")
 }
 
+type bound struct {
+	min, max int64
+}
 type vec struct {
 	x, y, z int64
+}
+type vecF struct {
+	x, y float64
 }
 type rec struct {
 	p, v vec
@@ -32,9 +38,21 @@ func part1() {
 	}
 }
 
+func parseRec(in io.Reader) (curRec rec) {
+	_, err := fmt.Fscanf(in, "%d, %d, %d @ %d, %d, %d", &curRec.p.x, &curRec.p.y, &curRec.p.z, &curRec.v.x, &curRec.v.y, &curRec.v.z)
+	if err == io.EOF {
+		return
+	} else if err != nil {
+		panic(err)
+	}
+
+	return
+}
+
 var (
-	part int
-	file string
+	part     int
+	file     string
+	boundary bound
 )
 
 func init() {
@@ -42,6 +60,20 @@ func init() {
 	flag.StringVar(&file, "f", "", "which exercise part?")
 
 }
+
+func (r rec) solveY(x float64) vecF {
+	slope := float64(r.v.y) / float64(r.v.x)
+	diffX := float64(r.p.x) - x
+	return vecF{x, float64(r.p.y) - (slope * diffX)}
+}
+
+/*
+func findCrossing(xb, yb bound, r1, r2 rec) {
+	// bisect xb.min to xb.max , see if they cross before one is out of bound
+	x := xb.min
+	d := (r1.solve)
+}
+*/
 
 func main() {
 	flag.Parse()
@@ -54,7 +86,11 @@ func main() {
 	switch part {
 	case 2:
 		part2()
+	case 0:
+		boundary = bound{7, 27}
+		part1()
 	default:
+		boundary = bound{200000000000000, 400000000000000}
 		part1()
 	}
 }

@@ -14,5 +14,6 @@ use (
 	./aoc2023/d4
 	./aoc2024/d1
 	./aoc2024/d2
+	./aoc2024/d3
 	./template/
 )

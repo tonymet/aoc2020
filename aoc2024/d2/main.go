@@ -67,11 +67,16 @@ func (row rec) safe(tl, th int) bool {
 		}
 		// different signs
 		if abs(row[l+1]-row[l]) < tl || abs(row[l+1]-row[l]) > th ||
-			abs(row[r]-row[r-1]) < tl || abs(row[r]-row[r-1]) > th ||
-			(row[l+1]-row[l])*(row[r]-row[r-1]) < 0 {
+			abs(row[r]-row[r-1]) < tl || abs(row[r]-row[r-1]) > th {
 			return false
 		}
 		l, r = l+1, r-1
+	}
+	for i := 0; i < len(row)-2; i++ {
+		if (row[i+1]-row[i])*(row[i+2]-row[i+1]) < 0 {
+			return false
+		}
+
 	}
 	return true
 

@@ -10,15 +10,8 @@
             "request": "launch",
             "mode": "auto",
             "program": "${file}",
-            //"env": {"PART": "2", "STDIN": "${fileDirname}/data/testinput.txt"},
-            // "env": {
-            //     "PART": "1"
-            // },
-            "env": {
-                "PART": "1",
-                "STDIN": "${fileDirname}/data/testinput.txt"
-            },
-            //"args" : ["-r", "[stdin:${fileDirname}/data/testinput.txt]"],
+            //"args" : ["-p", "1", "-f",  "${fileDirname}/data/sample.txt"],
+            "args" : ["-p", "1", "-f",  "${fileDirname}/data/aoc2023d3.txt"],
             "showLog": true
         }
     ]

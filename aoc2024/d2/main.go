@@ -1,11 +1,13 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"io"
 	"os"
 	_ "sort"
+	"strings"
 )
 
 func part2() {
@@ -22,17 +24,30 @@ func abs(x int) int {
 type rec []int
 
 func part1() {
-	var row rec = make(rec, 0)
-	for {
-		_, err := fmt.Scanf("%d %d %d %d %d", &row[0], &row[1], &row[2], &row[3], &row[4])
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			panic(err)
+	lineReader := bufio.NewScanner(os.Stdin)
+	var sum = 0
+	for lineReader.Scan() {
+		// scan line then scan the goods
+		line := lineReader.Text()
+		in := strings.NewReader(line)
+		var val int
+		var row rec = make(rec, 0, 8)
+		for {
+			_, err := fmt.Fscan(in, &val)
+			if err == io.EOF {
+				break
+			} else if err != nil {
+				panic(err)
+			}
+			row = append(row, val)
+
+		}
+		if row.safe() {
+			sum += 1
 		}
 		fmt.Printf("%+x, safe: %t\n", row, row.safe())
-		// fmt.Printf("gaptest : %+v\n", row.gap(1, 3))
 	}
+	fmt.Printf("sum : %d\n", sum)
 }
 
 func (row rec) safe() bool {
@@ -42,11 +57,9 @@ func (row rec) safe() bool {
 func (row rec) ascDesc() bool {
 	l, r := 0, len(row)-1
 	for {
-		// if l == r, break
 		if l == r {
 			break
 		}
-		// different signs
 		if (row[l+1]-row[l])*(row[r]-row[r-1]) < 0 {
 			return false
 		}

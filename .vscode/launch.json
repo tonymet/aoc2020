@@ -11,7 +11,7 @@
             "mode": "auto",
             "program": "${file}",
             //"args" : ["-p", "1", "-f",  "${fileDirname}/data/sample.txt"],
-            "args" : ["-p", "1", "-f",  "${fileDirname}/data/aoc2023d3.txt"],
+            "args" : ["-p2", "1", "-f",  "${fileDirname}/data/aoc2023d3.txt"],
             "showLog": true
         }
     ]

@@ -10,7 +10,56 @@ import (
 )
 
 func part2() {
-	fmt.Printf("part2 not implemented\n")
+	// part 1 to parse and build matrix
+	part1()
+	// loop symbols where = *
+	// find adjacent numbers
+	// if len = 2 multiply
+	// sum it up
+	sum := int64(0)
+	for _, sym := range symbolList {
+		if mtx[sym.y][sym.x] != '*' {
+			continue
+		}
+		ret, val := findNums(vec{sym.x, sym.y})
+		if len(ret) == 2 {
+			fmt.Printf("bounds of *: %+v, mult %d\n", ret, val)
+			sum += val
+		}
+	}
+	fmt.Printf("summysum: %d\n", sum)
+
+}
+
+func isNum(c byte) bool {
+	return c >= '0' && c <= '9'
+}
+
+func findNums(p vec) ([]int64, int64) {
+	var ret = make([]int64, 0, 9)
+	var valMap = make(map[int64]bool)
+	for yidx := p.y - 1; yidx < maxDim && yidx <= p.y+1; yidx += 1 {
+		if yidx < 0 {
+			continue
+		}
+		for xidx := p.x - 1; xidx < maxDim && xidx <= p.x+1; xidx += 1 {
+			if xidx < 0 {
+				continue
+			}
+			if valMtx[yidx][xidx] > 0 {
+				valMap[valMtx[yidx][xidx]] = true
+			}
+		}
+	}
+	//return ret
+	for k := range valMap {
+		ret = append(ret, k)
+	}
+	var sum int64 = ret[0]
+	for _, v := range ret[1:] {
+		sum = sum * v
+	}
+	return ret, sum
 }
 
 const (
@@ -18,7 +67,13 @@ const (
 	MAX_1 = 140
 )
 
-var maxDim = MAX_S
+var (
+	maxDim     = MAX_S
+	mtx        matrix
+	symbolList []vec
+	valMtx     [][]int64
+	sumList    []int64
+)
 
 type matrix [][]byte
 type vec struct {
@@ -26,12 +81,16 @@ type vec struct {
 }
 
 func part1() {
-	mtx := make(matrix, maxDim)
+	mtx = make(matrix, maxDim)
 	for i := 0; i < maxDim; i++ {
 		mtx[i] = make([]byte, maxDim)
 	}
-	var symbolList = make([]vec, 0)
-	var sumList = make([]int64, 0)
+	symbolList = make([]vec, 0)
+	sumList = make([]int64, 0)
+	valMtx = make([][]int64, maxDim)
+	for i := 0; i < maxDim; i++ {
+		valMtx[i] = make([]int64, maxDim)
+	}
 
 	var (
 		x int = 0
@@ -66,14 +125,17 @@ func part1() {
 				continue
 			}
 			switch {
-			case cur >= '0' && cur <= '9':
+			case isNum(cur):
 				// skip
 				val, l, err := readNum(&mtx, yidx, xidx)
 				// check and add
 				if err != nil {
 					continue
 				} else {
-					buf = l
+					buf = l - 1
+					for i := xidx; i < xidx+l; i++ {
+						valMtx[yidx][i] = val
+					}
 					if symbolCheck(&mtx, vec{xidx, yidx}, l) {
 						sumList = append(sumList, val)
 					}
@@ -112,7 +174,7 @@ func symbolCheck(mtx *matrix, p vec, l int) bool {
 			}
 			cur := (*mtx)[yidx][xidx]
 			switch {
-			case cur >= '0' && cur <= '9':
+			case isNum(cur):
 				continue
 			case cur == '.':
 				continue
@@ -129,7 +191,7 @@ func readNum(mtx *matrix, y, x int) (int64, int, error) {
 	slice := (*mtx)[y][x:maxDim]
 	bound := 0
 	for i, c := range slice {
-		if !(c >= '0' && c <= '9') {
+		if !(isNum(c)) {
 			break
 		}
 		bound = i
@@ -143,13 +205,16 @@ func readNum(mtx *matrix, y, x int) (int64, int, error) {
 }
 
 var (
-	part int
-	file string
+	part   int
+	file   string
+	format string
 )
 
 func init() {
 	flag.IntVar(&part, "p", 1, "which exercise part?")
 	flag.StringVar(&file, "f", "", "which exercise part?")
+	flag.StringVar(&format, "format", "sample", "sample|full")
+
 }
 func main() {
 	flag.Parse()
@@ -160,14 +225,17 @@ func main() {
 		}
 	}
 
+	switch format {
+	case "sample":
+		maxDim = 10
+	default:
+		maxDim = 140
+
+	}
 	switch part {
 	case 2:
 		part2()
-	case 0:
-		maxDim = MAX_S
-		part1()
 	default:
-		maxDim = MAX_1
 		part1()
 	}
 }

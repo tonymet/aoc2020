@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	_ "sort"
+	"strconv"
 	"strings"
 )
 
@@ -42,42 +43,32 @@ func part1() {
 			row = append(row, val)
 
 		}
-		if row.safe() {
+		if row.safe(1, 3) {
 			sum += 1
 		}
-		fmt.Printf("%+x, safe: %t\n", row, row.safe())
+		fmt.Printf("%v, safe: %t\n", row, row.safe(1, 3))
 	}
 	fmt.Printf("sum : %d\n", sum)
 }
 
-func (row rec) safe() bool {
-	return row.ascDesc() && row.gap(1, 3)
-}
-
-func (row rec) ascDesc() bool {
-	l, r := 0, len(row)-1
-	for {
-		if l == r {
-			break
-		}
-		if (row[l+1]-row[l])*(row[r]-row[r-1]) < 0 {
-			return false
-		}
-		l, r = l+1, r-1
+func (row rec) String() string {
+	b := make([]byte, 0, len(row)*3)
+	for _, v := range row {
+		b = strconv.AppendInt(b, int64(v), 10)
+		b = append(b, ' ')
 	}
-	return true
+	return string(b)
 }
-
-func (row rec) gap(tl, th int) bool {
+func (row rec) safe(tl, th int) bool {
 	l, r := 0, len(row)-1
 	for {
-		// if l == r, break
-		if l == r {
+		if l > r {
 			break
 		}
 		// different signs
 		if abs(row[l+1]-row[l]) < tl || abs(row[l+1]-row[l]) > th ||
-			abs(row[r]-row[r-1]) < tl || abs(row[r]-row[r-1]) > th {
+			abs(row[r]-row[r-1]) < tl || abs(row[r]-row[r-1]) > th ||
+			(row[l+1]-row[l])*(row[r]-row[r-1]) < 0 {
 			return false
 		}
 		l, r = l+1, r-1

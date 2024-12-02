@@ -14,19 +14,22 @@ func part2() {
 }
 
 const (
-	MAX_Y = 140
-	MAX_X = 140
-	// MAX_X = 10
-	// MAX_Y = 10
+	MAX_S = 10
+	MAX_1 = 140
 )
 
-type matrix [MAX_Y][MAX_X]byte
+var maxDim = MAX_S
+
+type matrix [][]byte
 type vec struct {
 	x, y int
 }
 
 func part1() {
-	var mtx matrix
+	mtx := make(matrix, maxDim)
+	for i := 0; i < maxDim; i++ {
+		mtx[i] = make([]byte, maxDim)
+	}
 	var symbolList = make([]vec, 0)
 	var sumList = make([]int64, 0)
 
@@ -54,9 +57,9 @@ func part1() {
 		}
 	}
 	// find special chars
-	for yidx := 0; yidx < MAX_Y; yidx += 1 {
+	for yidx := 0; yidx < maxDim; yidx += 1 {
 		buf := 0
-		for xidx := 0; xidx < MAX_X; xidx += 1 {
+		for xidx := 0; xidx < maxDim; xidx += 1 {
 			cur := mtx[yidx][xidx]
 			if buf > 0 {
 				buf -= 1
@@ -99,15 +102,15 @@ func part1() {
 }
 
 func symbolCheck(mtx *matrix, p vec, l int) bool {
-	for yidx := p.y - 1; yidx < MAX_Y && yidx <= p.y+1; yidx += 1 {
+	for yidx := p.y - 1; yidx < maxDim && yidx <= p.y+1; yidx += 1 {
 		if yidx < 0 {
 			continue
 		}
-		for xidx := p.x - 1; xidx < MAX_X && xidx < p.x+l+1; xidx += 1 {
+		for xidx := p.x - 1; xidx < maxDim && xidx < p.x+l+1; xidx += 1 {
 			if xidx < 0 {
 				continue
 			}
-			cur := mtx[yidx][xidx]
+			cur := (*mtx)[yidx][xidx]
 			switch {
 			case cur >= '0' && cur <= '9':
 				continue
@@ -123,7 +126,7 @@ func symbolCheck(mtx *matrix, p vec, l int) bool {
 }
 
 func readNum(mtx *matrix, y, x int) (int64, int, error) {
-	slice := mtx[y][x:MAX_X]
+	slice := (*mtx)[y][x:maxDim]
 	bound := 0
 	for i, c := range slice {
 		if !(c >= '0' && c <= '9') {
@@ -160,7 +163,11 @@ func main() {
 	switch part {
 	case 2:
 		part2()
+	case 0:
+		maxDim = MAX_S
+		part1()
 	default:
+		maxDim = MAX_1
 		part1()
 	}
 }

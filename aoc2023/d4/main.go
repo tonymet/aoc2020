@@ -19,9 +19,10 @@ func abs(x int) int {
 }
 
 type rec struct {
-	winners []int64
-	card    []int64
-	id      int64
+	winners  []int64
+	card     []int64
+	iwinners map[int64]bool
+	id       int64
 }
 
 func (r rec) String() string {
@@ -41,6 +42,13 @@ func (r rec) String() string {
 	return string(b)
 }
 
+func (r *rec) index() {
+	r.iwinners = make(map[int64]bool)
+	for _, v := range r.winners {
+		r.iwinners[v] = true
+	}
+}
+
 func log(f string, val ...any) {
 	if silent {
 		return
@@ -55,6 +63,21 @@ var (
 	STATE_CARD      = 4
 	state       int = STATE_ID
 )
+
+func (r rec) Score() int64 {
+	total := int64(0)
+	for _, v := range r.card {
+		_, ok := r.iwinners[v]
+		if ok {
+			if total == 0 {
+				total = 1
+			} else {
+				total = total * 2
+			}
+		}
+	}
+	return total
+}
 
 func part2() {
 	fmt.Printf("part2 not implemented\n")
@@ -78,17 +101,16 @@ func part1(in io.Reader) {
 				lineScanner.Scan()
 				t := lineScanner.Text()
 				if v, err := strconv.ParseInt(t[:len(t)-1], 10, 64); err != nil {
-					fmt.Printf("no parse")
+					log("no parse")
 				} else {
 					curRec.id = v
 				}
 			case "|":
 				state = STATE_CARD
-				fmt.Print("  | ")
 			default:
 				word := lineScanner.Text()
 				if v, err := strconv.ParseInt(word, 10, 64); err != nil {
-					fmt.Printf("no parse: %+v", word)
+					log("no parse: %+v", word)
 				} else {
 					switch state {
 					case STATE_WIN:
@@ -99,15 +121,10 @@ func part1(in io.Reader) {
 				}
 			}
 		}
+		curRec.index()
+		fmt.Printf("score: %d  ", curRec.Score())
 		fmt.Println(curRec)
-	}
-	// Validate the input
-	for scanner.Scan() {
-		fmt.Printf("%s\n", scanner.Text())
-	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Printf("Invalid input: %s", err)
 	}
 }
 

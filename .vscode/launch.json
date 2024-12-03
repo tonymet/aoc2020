@@ -23,8 +23,8 @@
             //"args" : ["-p", "1", "-f",  "${fileDirname}/data/sample.txt"],
             //"args" : ["-p", "2", "-f",  "${fileDirname}/data/sample.txt"],
             //"args" : ["-p", "1", "-f",  "${fileDirname}/data/aoc2023d4.txt"],
-            //"args" : ["-p", "1", "-f",  "${fileDirname}/data/sample.txt"],
-            "args" : ["-p", "1", "-f",  "${fileDirname}/data/aoc2024d2.txt"],
+            "args" : ["-p", "1", "-f",  "${fileDirname}/data/sample.txt"],
+            //"args" : ["-p", "1", "-f",  "${fileDirname}/data/aoc2024d2.txt"],
             //"args" : ["-p", "2", "-f",  "${fileDirname}/data/aoc2024d2.txt"],
             //"showLog": true
         }

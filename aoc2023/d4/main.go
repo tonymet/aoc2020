@@ -85,6 +85,7 @@ func part2() {
 
 func part1(in io.Reader) {
 	scanner := bufio.NewScanner(in)
+	var sum int64 = 0
 	for scanner.Scan() {
 		// each line
 		var curRec rec
@@ -122,10 +123,12 @@ func part1(in io.Reader) {
 			}
 		}
 		curRec.index()
-		fmt.Printf("score: %d  ", curRec.Score())
+		score := curRec.Score()
+		fmt.Printf("score: %d  ", score)
 		fmt.Println(curRec)
-
+		sum += score
 	}
+	fmt.Printf("sum : %d\n", sum)
 }
 
 var (

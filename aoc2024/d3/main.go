@@ -8,6 +8,8 @@ import (
 	"os"
 	"regexp"
 	_ "sort"
+
+	"github.com/tonymet/aoc2020/shared"
 )
 
 func log(f string, val ...any) {
@@ -17,25 +19,10 @@ func log(f string, val ...any) {
 	fmt.Printf(f, val...)
 }
 
-// generate a bufio splitter based on the regex
-func splitterFactory(re *regexp.Regexp) func([]byte, bool) (int, []byte, error) {
-	return func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		loc := re.FindIndex(data)
-		if loc == nil {
-			// try again
-			if !atEOF {
-				return 0, nil, nil
-			}
-			return 0, nil, bufio.ErrFinalToken
-		}
-		return loc[1], data[loc[0]:loc[1]], nil
-	}
-}
-
 func part2(in io.Reader) {
 	sum := int64(0)
 	scanner := bufio.NewScanner(in)
-	patternSplit := splitterFactory(mulPattern2)
+	patternSplit := shared.SplitterFactory(mulPattern2)
 	scanner.Split(patternSplit)
 	do := true
 	for scanner.Scan() {
@@ -59,7 +46,7 @@ func part2(in io.Reader) {
 func part1(in io.ReadSeeker) {
 	sum := int64(0)
 	scanner := bufio.NewScanner(in)
-	patternSplit := splitterFactory(mulPattern)
+	patternSplit := shared.SplitterFactory(mulPattern)
 	scanner.Split(patternSplit)
 	for scanner.Scan() {
 		text := scanner.Text()

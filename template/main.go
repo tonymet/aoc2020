@@ -8,22 +8,6 @@ import (
 	_ "sort"
 )
 
-func abs(x int) int {
-	if x < 0 {
-		return -1 * x
-	}
-	return x
-}
-
-type rec []int
-
-func log(f string, val ...any) {
-	if silent {
-		return
-	}
-	fmt.Printf(f, val...)
-}
-
 func part2() {
 	fmt.Printf("part2 not implemented\n")
 }

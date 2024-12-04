@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
-	_ "io"
+	"io"
 	"os"
+	"regexp"
 	_ "sort"
 )
 
@@ -28,14 +30,32 @@ func part2() {
 	fmt.Printf("part2 not implemented\n")
 }
 
-func part1() {
-	fmt.Printf("part1 not implemented\n")
+func part1(in io.ReadSeeker) {
+	scanner := bufio.NewScanner(in)
+	patternSplit := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		loc := mulPattern.FindIndex(data)
+		if loc == nil {
+			if !atEOF {
+				return 0, nil, nil
+			}
+			// If we have reached the end, return the last token.
+			return 0, nil, bufio.ErrFinalToken
+		}
+		// Otherwise, return the token before the comma.
+		return loc[1], data[loc[0]:loc[1]], nil
+	}
+	scanner.Split(patternSplit)
+	for scanner.Scan() {
+		text := scanner.Text()
+		fmt.Printf("token: %s\n", text)
+	}
 }
 
 var (
-	part   int
-	file   string
-	silent bool
+	part       int
+	file       string
+	silent     bool
+	mulPattern = regexp.MustCompile(`(?m)mul\(\d{1,5},\d{1,5}\)`)
 )
 
 func init() {
@@ -57,6 +77,6 @@ func main() {
 	case 2:
 		part2()
 	default:
-		part1()
+		part1(os.Stdin)
 	}
 }

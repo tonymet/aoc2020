@@ -31,6 +31,7 @@ func part2() {
 }
 
 func part1(in io.ReadSeeker) {
+	sum := int64(0)
 	scanner := bufio.NewScanner(in)
 	patternSplit := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
 		loc := mulPattern.FindIndex(data)
@@ -47,8 +48,17 @@ func part1(in io.ReadSeeker) {
 	scanner.Split(patternSplit)
 	for scanner.Scan() {
 		text := scanner.Text()
-		fmt.Printf("token: %s\n", text)
+		v := execMul(text)
+		fmt.Printf("token: %s, v= %d\n", text, v)
+		sum += v
 	}
+	fmt.Printf("sum: %d\n", sum)
+}
+
+func execMul(x string) int64 {
+	var l, r int64
+	fmt.Sscanf(x, "mul(%d,%d)", &l, &r)
+	return l * r
 }
 
 var (

@@ -17,53 +17,67 @@ func part2() {
 var (
 	STATE_RULES   = 1
 	STATE_UPDATES = 2
-	state         int
+	ruleList      []rule
 )
 
 type rule struct {
 	l, r int64
 }
-type ruleset []rule
+type updateSpec []int64
+
+func (u updateSpec) checkRules() bool {
+	for _, rule := range ruleList {
+		lVal, rVal := rule.l, rule.r
+		var l, r int
+		lFound, rFound := false, false
+		for l = 0; l < len(u); l++ {
+			if u[l] == lVal {
+				lFound = true
+				break
+			}
+		}
+		for r = len(u) - 1; r >= 0; r-- {
+			if u[r] == rVal {
+				rFound = true
+				break
+			}
+		}
+		if !(lFound && rFound) {
+			continue
+		}
+		// l passed R
+		if l >= r {
+			return false
+		}
+	}
+	return true
+}
+
+func (u updateSpec) indexValue() int64 {
+	p := len(u) / 2
+	return u[p]
+}
 
 func part1(in io.Reader) {
-	fmt.Printf("part1 not implemented\n")
 	var l, r, d int64
-	var state = STATE_RULES
-	aRuleset := make(map[int64]ruleset)
-forloop:
+	ruleList = make([]rule, 0)
+	sum := int64(0)
 	for {
-		switch state {
-		case STATE_RULES:
-			n, err := fmt.Fscanf(in, "%d|%d", &l, &r)
-			if err == io.EOF {
-				break forloop
-			}
-			if n == 0 {
-				break forloop
-			} else if err != nil {
-				break forloop
-			}
-			curRule := rule{l, r}
-			{
-				_, ok := aRuleset[l]
-				if !ok {
-					aRuleset[l] = make(ruleset, 0)
-				}
-				aRuleset[l] = append(aRuleset[l], curRule)
-			}
-			{
-				_, ok := aRuleset[r]
-				if !ok {
-					aRuleset[r] = make(ruleset, 0)
-				}
-				aRuleset[r] = append(aRuleset[r], curRule)
-			}
-			fmt.Printf("l , r = %d, %d\n", l, r)
+		n, err := fmt.Fscanf(in, "%d|%d", &l, &r)
+		if err == io.EOF {
+			break
 		}
+		if n == 0 {
+			break
+		} else if err != nil {
+			break
+		}
+		curRule := rule{l, r}
+		ruleList = append(ruleList, curRule)
 	}
 	lineReader := bufio.NewScanner(in)
 	for lineReader.Scan() {
-		var updateRecord = make([]int64, 0)
+		var updateRecord = make(updateSpec, 0)
 		line := lineReader.Text()
 		numReader := strings.NewReader(line)
 		for {
@@ -78,14 +92,14 @@ forloop:
 			// discard comma
 			numReader.Read(c)
 		}
-		fmt.Printf("UR: %+v\n", updateRecord)
+		check := updateRecord.checkRules()
+		fmt.Printf("UR: %+v, checkRules: %t \n", updateRecord, check)
+		if check {
+			sum += updateRecord.indexValue()
+		}
 	}
-	fmt.Printf("ruleset %+x\n", aRuleset)
 
-	// read orderings into a hash. num -> [n]orderings. both sides will be keyed
-	// list of all scoped orderings
-	// iter list . use l-R traversal to confirm instance of ordering is true
-	// violation return false.
+	fmt.Printf("sum: %d\n", sum)
 }
 
 var (
@@ -98,7 +112,6 @@ func init() {
 	flag.IntVar(&part, "p", 1, "which exercise part?")
 	flag.StringVar(&file, "f", "", "which exercise part?")
 	flag.BoolVar(&silent, "s", false, "silent?")
-
 }
 
 func main() {

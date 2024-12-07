@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	silent bool
+	Silent bool
 )
 
 func Abs(x int) int {
@@ -20,7 +20,7 @@ func Abs(x int) int {
 type rec []int
 
 func Log(f string, val ...any) {
-	if silent {
+	if Silent {
 		return
 	}
 	fmt.Printf(f, val...)

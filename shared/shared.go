@@ -3,7 +3,9 @@ package shared
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"regexp"
+	"strings"
 )
 
 var (
@@ -24,6 +26,15 @@ func Log(f string, val ...any) {
 		return
 	}
 	fmt.Printf(f, val...)
+}
+
+func LineProcessor(in io.Reader, processor func(io.Reader)) {
+	lineScanner := bufio.NewScanner(in)
+	for lineScanner.Scan() {
+		line := lineScanner.Text()
+		lineReader := strings.NewReader(line)
+		processor(lineReader)
+	}
 }
 
 // generate a bufio splitter based on the regex

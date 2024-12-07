@@ -7,23 +7,45 @@ import (
 	"io"
 	"os"
 	_ "sort"
+	_ "strconv"
 	"strings"
-)
 
-func part2() {
-	fmt.Printf("part2 not implemented\n")
-}
+	"github.com/stevenle/topsort/v2"
+)
 
 var (
 	STATE_RULES   = 1
 	STATE_UPDATES = 2
-	ruleList      []rule
+	ruleList      ruleset
 )
+
+type ruleset []rule
 
 type rule struct {
 	l, r int64
 }
 type updateSpec []int64
+
+func (u updateSpec) fix() updateSpec {
+	topo := topsort.NewGraph[int64]()
+	index := make(map[int64]bool)
+	for _, v := range u {
+		index[v] = true
+	}
+
+	for _, rule := range ruleList {
+		_, ok1 := index[rule.l]
+		_, ok2 := index[rule.r]
+		if ok1 && ok2 {
+			topo.AddEdge(rule.r, rule.l)
+		}
+	}
+	path, err := topo.TopSort(topo.RootNode())
+	if err != nil {
+		return updateSpec{}
+	}
+	return path
+}
 
 func (u updateSpec) checkRules() bool {
 	for _, rule := range ruleList {
@@ -62,6 +84,7 @@ func part1(in io.Reader) {
 	var l, r, d int64
 	ruleList = make([]rule, 0)
 	sum := int64(0)
+	sum2 := int64(0)
 	for {
 		n, err := fmt.Fscanf(in, "%d|%d", &l, &r)
 		if err == io.EOF {
@@ -96,10 +119,17 @@ func part1(in io.Reader) {
 		fmt.Printf("UR: %+v, checkRules: %t \n", updateRecord, check)
 		if check {
 			sum += updateRecord.indexValue()
+		} else {
+			fixed := updateRecord.fix()
+			fixChecked := fixed.checkRules()
+			fmt.Printf("fixed: %+v, checkRules: %t \n", fixed, fixChecked)
+			sum2 += fixed.indexValue()
 		}
+
 	}
 
-	fmt.Printf("sum: %d\n", sum)
+	fmt.Printf("sum1 := %d ", sum)
+	fmt.Printf("sum2 := %d ", sum2)
 }
 
 var (
@@ -124,7 +154,7 @@ func main() {
 	}
 	switch part {
 	case 2:
-		part2()
+		part1(os.Stdin)
 	default:
 		part1(os.Stdin)
 	}

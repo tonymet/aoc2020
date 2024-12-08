@@ -8,21 +8,72 @@ import (
 	"github.com/tonymet/aoc2020/shared"
 	"io"
 	"os"
-	_ "sort"
 )
+
+var (
+	OP_TYPE_VALUE = 1
+	OP_TYPE_OP    = 2
+)
+
+type paramType []int64
+type opType func(int64, int64) int64
+type opValue struct {
+	typeOf int
+	v      int64
+	op     func(int64, int64) int64
+}
 
 func part2(in io.Reader) {
 	fmt.Printf("part2 not implemented\n")
 }
 
+func (p paramType) bruteForce(want int64) bool {
+	// brute force all variations and see if we return
+	ops := []opType{
+		func(a, b int64) int64 { return a + b },
+		func(a, b int64) int64 { return a * b },
+	}
+	//po
+	// initial ops
+
+	for pos := 1; pos < (2 * (len(p) - 1)); pos++ {
+		opsStack := make([]opValue, 0, len(p)+len(p)-1)
+		for i := 0; i < len(p); i++ {
+			operand := opValue{v: p[i], typeOf: OP_TYPE_VALUE}
+			opsStack = append(opsStack, operand)
+			if i == len(p)-1 {
+				continue
+			}
+			operator := opValue{typeOf: OP_TYPE_OP, op: ops[(i+pos)%2]}
+			opsStack = append(opsStack, operator)
+		}
+		// calculate
+		for {
+			if len(opsStack) == 1 {
+				break
+			}
+			// shift off and push
+			curOps := opsStack[0:3]
+			opsStack = opsStack[3:]
+			v := curOps[1].op(curOps[0].v, curOps[2].v)
+			opsStack = append([]opValue{{typeOf: OP_TYPE_VALUE, v: v}}, opsStack...)
+		}
+		if opsStack[0].v == want {
+			return true
+		}
+	}
+	return false
+}
+
 func part1(in io.Reader) {
+	sum := int64(0)
 	shared.LineProcessor(in, func(line io.Reader) {
 		// scan values
 		var (
 			want   int64
-			params []int64
+			params paramType
 		)
-		params = make([]int64, 0, 8)
+		params = make(paramType, 0, 8)
 		_, err := fmt.Fscanf(line, "%d:", &want)
 		if err == io.EOF {
 			panic(io.ErrUnexpectedEOF)
@@ -41,8 +92,13 @@ func part1(in io.Reader) {
 			params = append(params, p)
 		}
 		fmt.Printf("w: %d ", want)
-		fmt.Printf("p: %+v\n", params)
+		viable := params.bruteForce(want)
+		fmt.Printf("p: %+v, viable: %t\n", params, params.bruteForce(want))
+		if viable {
+			sum += want
+		}
 	})
+	fmt.Printf("sum: %d\n", sum)
 }
 
 var (

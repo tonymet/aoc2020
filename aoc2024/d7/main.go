@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/tonymet/aoc2020/shared"
 	"io"
+	"math/rand"
 	"os"
 )
 
@@ -27,6 +28,19 @@ func part2(in io.Reader) {
 	fmt.Printf("part2 not implemented\n")
 }
 
+func calcStack(opsStack []opValue) int64 {
+	for {
+		if len(opsStack) == 1 {
+			return opsStack[0].v
+		}
+		// shift off and push
+		curOps := opsStack[0:3]
+		opsStack = opsStack[3:]
+		v := curOps[1].op(curOps[0].v, curOps[2].v)
+		opsStack = append([]opValue{{typeOf: OP_TYPE_VALUE, v: v}}, opsStack...)
+	}
+}
+
 func (p paramType) bruteForce(want int64) bool {
 	// brute force all variations and see if we return
 	ops := []opType{
@@ -36,7 +50,7 @@ func (p paramType) bruteForce(want int64) bool {
 	//po
 	// initial ops
 
-	for pos := 1; pos < (2 * (len(p) - 1)); pos++ {
+	for pos := 1; pos < (2000 * (len(p) - 1)); pos++ {
 		opsStack := make([]opValue, 0, len(p)+len(p)-1)
 		for i := 0; i < len(p); i++ {
 			operand := opValue{v: p[i], typeOf: OP_TYPE_VALUE}
@@ -44,21 +58,11 @@ func (p paramType) bruteForce(want int64) bool {
 			if i == len(p)-1 {
 				continue
 			}
-			operator := opValue{typeOf: OP_TYPE_OP, op: ops[(i+pos)%2]}
+			operator := opValue{typeOf: OP_TYPE_OP, op: ops[(i+rand.Int())%2]}
 			opsStack = append(opsStack, operator)
 		}
 		// calculate
-		for {
-			if len(opsStack) == 1 {
-				break
-			}
-			// shift off and push
-			curOps := opsStack[0:3]
-			opsStack = opsStack[3:]
-			v := curOps[1].op(curOps[0].v, curOps[2].v)
-			opsStack = append([]opValue{{typeOf: OP_TYPE_VALUE, v: v}}, opsStack...)
-		}
-		if opsStack[0].v == want {
+		if calcStack(opsStack) == want {
 			return true
 		}
 	}
@@ -93,7 +97,7 @@ func part1(in io.Reader) {
 		}
 		fmt.Printf("w: %d ", want)
 		viable := params.bruteForce(want)
-		fmt.Printf("p: %+v, viable: %t\n", params, params.bruteForce(want))
+		fmt.Printf("p: %+v, viable: %t\n", params, viable)
 		if viable {
 			sum += want
 		}

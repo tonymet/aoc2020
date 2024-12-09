@@ -3,16 +3,16 @@ package main
 import (
 	"flag"
 	"fmt"
-	_ "io"
+	"io"
 	"os"
 	_ "sort"
 )
 
-func part2() {
+func part2(in io.Reader) {
 	fmt.Printf("part2 not implemented\n")
 }
 
-func part1() {
+func part1(in io.Reader) {
 	fmt.Printf("part1 not implemented\n")
 }
 
@@ -39,8 +39,8 @@ func main() {
 	}
 	switch part {
 	case 2:
-		part2()
+		part2(os.Stdin)
 	default:
-		part1()
+		part1(os.Stdin)
 	}
 }

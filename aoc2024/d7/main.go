@@ -5,10 +5,12 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/tonymet/aoc2020/shared"
 	"io"
+	"math"
 	"math/rand"
 	"os"
+
+	"github.com/tonymet/aoc2020/shared"
 )
 
 var (
@@ -50,7 +52,7 @@ func (p paramType) bruteForce(want int64) bool {
 	//po
 	// initial ops
 
-	for pos := 1; pos < (2000 * (len(p) - 1)); pos++ {
+	for pos := 1; pos < int(math.Exp2(float64(len(p))))+3000; pos++ {
 		opsStack := make([]opValue, 0, len(p)+len(p)-1)
 		for i := 0; i < len(p); i++ {
 			operand := opValue{v: p[i], typeOf: OP_TYPE_VALUE}
@@ -95,9 +97,9 @@ func part1(in io.Reader) {
 			}
 			params = append(params, p)
 		}
-		fmt.Printf("w: %d ", want)
+		//fmt.Printf("w: %d ", want)
 		viable := params.bruteForce(want)
-		fmt.Printf("p: %+v, viable: %t\n", params, viable)
+		//fmt.Printf("p: %+v, viable: %t\n", params, viable)
 		if viable {
 			sum += want
 		}

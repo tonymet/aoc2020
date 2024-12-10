@@ -11,10 +11,36 @@ import (
 
 type fsType []int64
 type blockType []int64
+type boundary struct {
+	l, r int
+}
+
+func (b boundary) len() int {
+	return b.r - b.l + 1
+}
 
 var (
 	EMPTY = int64(-1)
 )
+
+func (fs fsType) rbounds(l int) int {
+	for v := fs[l]; l >= 0; l++ {
+		if fs[l] != v {
+			break
+		}
+	}
+	return l - 1
+
+}
+
+func (fs fsType) lbounds(r int) int {
+	for v := fs[r]; r >= 0; r-- {
+		if fs[r] != v {
+			break
+		}
+	}
+	return r + 1
+}
 
 func (fs fsType) String() string {
 	var output = make([]byte, 0, len(fs))
@@ -29,7 +55,13 @@ func (fs fsType) String() string {
 }
 
 func part2(in io.Reader) {
-	fmt.Printf("part2 not implemented\n")
+	fs := readInput(in)
+	//fmt.Printf("fs: %s", fs)
+	fmt.Printf("orig cksum: %d\n", fs.cksum())
+	fs.defrag2()
+	//fmt.Printf("defrag: %s\n", fs)
+	fmt.Printf("score: %d\n", fs.score())
+	fmt.Printf("cksum: %d\n", fs.cksum())
 }
 
 func parseInt(c byte) int64 {
@@ -61,6 +93,44 @@ func (fs fsType) score() (r int64) {
 	return
 }
 
+func (fs fsType) findSpace(s int) (int, error) {
+	for i := 0; i < len(fs); i++ {
+		if i+s >= len(fs) {
+			return 0, fmt.Errorf("does not fit")
+		}
+
+	}
+
+}
+
+func (fs fsType) defrag2() fsType {
+	// defrag l , r
+	// seek to last value and read
+	for l, r := 0, len(fs)-1; l <= r-2; {
+		if fs[l] != EMPTY {
+			l++
+			continue
+		}
+		if fs[r] == EMPTY {
+			r--
+			continue
+		}
+		var lb, rb boundary
+		lb.l, lb.r = l, fs.rbounds(l)
+		rb.l, rb.r = fs.lbounds(r), r
+		// test for move then proceed
+		if lb.len() >= rb.len() {
+			for i := 0; i < rb.len(); i++ {
+				fs[l+i] = fs[r-i]
+				fs[r-i] = EMPTY
+			}
+			l += rb.len()
+			r -= rb.len()
+		}
+	}
+	return fs
+}
+
 func (fs fsType) defrag() fsType {
 	// defrag l , r
 	for l, r := 0, len(fs)-1; l <= r-2; {
@@ -89,7 +159,6 @@ func part1(in io.Reader) {
 }
 
 func readInput(in io.Reader) fsType {
-	fmt.Printf("part1 not implemented\n")
 	var (
 		fs    = make(fsType, 0, 20000*10)
 		id    = int64(0)

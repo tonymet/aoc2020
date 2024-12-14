@@ -5,3 +5,6 @@ main
 output.txt
 session
 tmp
+aoc2024/d11/cpu.prof
+aoc2024/d11/mem.prof
+aoc2024/d11/d11.test

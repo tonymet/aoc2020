@@ -4,59 +4,61 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	_ "sort"
-	"strconv"
 )
 
-func part2(in io.Reader) {
-	fmt.Printf("part2 not implemented\n")
-}
-
 type stonesType []int64
+type indexType map[int64]int64
 
-// If the stone is engraved with the number 0, it is replaced by a stone engraved with the number 1.
-// If the stone is engraved with a number that has an even number of digits, it is replaced by two stones. The left half of the digits are engraved on the new left stone, and the right half of the digits are engraved on the new right stone. (The new numbers don't keep extra leading zeroes: 1000 would become stones 10 and 0.)
-// If none of the other rules apply, the stone is replaced by a new stone; the old stone's number multiplied by 2024 is engraved on the new stone.
-func digLen(s int64) int {
-	return len(strconv.FormatInt(s, 10))
-}
-func splitStone(s int64) []int64 {
-	toString := strconv.FormatInt(s, 10)
-	strLen := len(toString)
-	l, r := toString[:strLen-1], toString[strLen-1:]
-	lInt, err := strconv.ParseInt(l, 10, 64)
-	if err != nil {
-		panic(err)
+func mergeIndexFactor(l, r indexType, f int64) {
+	for k := range r {
+		l[k] += r[k] * f
 	}
-	rInt, err := strconv.ParseInt(r, 10, 64)
-	if err != nil {
-		panic(err)
-	}
-	ret := make([]int64, 2)
-	ret[0], ret[1] = lInt, rInt
-	return ret
 }
 
+func sumValues(s indexType) (sum int64) {
+	for _, v := range s {
+		sum += v
+	}
+	return
+}
+
+func splitInteger(num int64) (left, right int64, digits int) {
+	temp := num
+	for temp > 0 {
+		digits++
+		temp /= 10
+	}
+	divisor := int64(math.Pow10(digits / 2))
+	left = num / divisor
+	right = num % divisor
+	return
+}
+
+func index(stones stonesType) indexType {
+	index := make(indexType)
+	for _, v := range stones {
+		index[v] += 1
+	}
+	return index
+}
 func blink(in stonesType) stonesType {
-	// rules
-	ret := make(stonesType, 0, len(in)*5)
+	ret := make(stonesType, 0, len(in)*2)
 	for _, s := range in {
-		switch {
-		case s == 0:
+		if s == 0 {
 			ret = append(ret, 1)
-		case digLen(s)%2 == 0:
-			ret = append(ret, splitStone(s)...)
-		default:
+		} else if l, r, digits := splitInteger(s); digits%2 == 0 {
+			ret = append(ret, l, r)
+		} else {
 			ret = append(ret, s*2024)
 		}
-
 	}
 	return ret
 }
 
-func part1(in io.Reader) {
-	fmt.Printf("part1 not implemented\n")
+func parseStones(in io.Reader) stonesType {
 	initStones := make(stonesType, 0, 5)
 	for {
 		var cur int64
@@ -68,11 +70,34 @@ func part1(in io.Reader) {
 		}
 		initStones = append(initStones, cur)
 	}
-	fmt.Printf("initStones: %+v", initStones)
-	var r = initStones
-	for range 25 {
-		r := blink(r)
-		fmt.Printf("r: %+v", r)
+	return initStones
+}
+
+func stoners(in io.Reader) {
+	initStones := parseStones(in)
+	fmt.Printf("initStones: %+v\n", initStones)
+	stoneIndex := index(initStones)
+	var cap = [2]int64{5, 5}
+	switch part {
+	case 1:
+	case 2:
+		cap = [2]int64{5, 15}
+	default:
+		panic("no cap")
+	}
+	for range cap[0] {
+		curIndex := make(indexType)
+		for k, v := range stoneIndex {
+			// go 10 deep
+			cur := make(stonesType, 1)
+			cur[0] = k
+			for range cap[1] {
+				cur = blink(cur)
+			}
+			mergeIndexFactor(curIndex, index(cur), v)
+		}
+		stoneIndex = curIndex
+		fmt.Printf("curIndex sum: %d\n", sumValues(curIndex))
 	}
 }
 
@@ -97,10 +122,5 @@ func main() {
 			panic(err)
 		}
 	}
-	switch part {
-	case 2:
-		part2(os.Stdin)
-	default:
-		part1(os.Stdin)
-	}
+	stoners(os.Stdin)
 }

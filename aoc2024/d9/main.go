@@ -93,15 +93,15 @@ func (fs fsType) score() (r int64) {
 	return
 }
 
-func (fs fsType) findSpace(s int) (int, error) {
-	for i := 0; i < len(fs); i++ {
-		if i+s >= len(fs) {
-			return 0, fmt.Errorf("does not fit")
-		}
+// func (fs fsType) findSpace(s int) (int, error) {
+// 	for i := 0; i < len(fs); i++ {
+// 		if i+s >= len(fs) {
+// 			return 0, fmt.Errorf("does not fit")
+// 		}
 
-	}
-
-}
+// 	}
+// 	return i, nil
+// }
 
 func (fs fsType) defrag2() fsType {
 	// defrag l , r

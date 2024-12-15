@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"math"
 	"os"
-	_ "sort"
+
+	"github.com/tonymet/aoc2020/shared"
 )
 
 type stonesType []int64
@@ -31,7 +31,7 @@ func splitInteger(num int64) (left, right int64, digits int) {
 		digits++
 		temp /= 10
 	}
-	divisor := int64(math.Pow10(digits / 2))
+	divisor := int64(shared.Pow10(digits / 2))
 	left = num / divisor
 	right = num % divisor
 	return
@@ -88,9 +88,7 @@ func stoners(in io.Reader) {
 	for range cap[0] {
 		curIndex := make(indexType)
 		for k, v := range stoneIndex {
-			// go 10 deep
-			cur := make(stonesType, 1)
-			cur[0] = k
+			cur := stonesType{k}
 			for range cap[1] {
 				cur = blink(cur)
 			}

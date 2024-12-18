@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	_ "sort"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -25,6 +25,15 @@ type button struct {
 
 type solution struct {
 	a, b, score int
+}
+type solutions []solution
+
+func (a solutions) Len() int           { return len(a) }
+func (a solutions) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a solutions) Less(i, j int) bool { return a[i].score < a[j].score }
+
+func makeSol(a, b int) solution {
+	return solution{a: a, b: b, score: a*3 + b*1}
 }
 
 func (v vec) mult(x int) vec {
@@ -65,35 +74,27 @@ var (
 
 func solve(bA, bB button, p vec) (solution, error) {
 	// test simple division % = 0 4 cases
-	if (p.mod2(bA.dir) == vec{0, 0}) {
-		return solution{a: p.x / bA.dir.x, b: 0}, nil
-	} else if (p.mod2(bB.dir) == vec{0, 0}) {
-		// TOOD best solution
-		return solution{a: 0, b: p.x / bB.dir.x}, nil
-	}
-
-	// subtract A and test difference mult B % = 0
 	cur := p
-	for cur.x > 0 && cur.y > 0 {
-		cur = cur.diff(bB.dir)
-		gap := p.diff(cur)
-		if (cur.mod2(bA.dir) == vec{0, 0}) {
-			// TODO find best solution here
-			// calculate bA facotr, bB Facto4
-			// return
+	gap := vec{0, 0}
+	solutions := make(solutions, 0, 5)
+	for cur.x >= 0 && cur.y >= 0 {
+		if (cur.mod2(bA.dir) == vec{0, 0} && gap.mod2(bB.dir) == vec{0, 0}) {
 			bAFactor := cur.x / bA.dir.x
 			bBFactor := gap.x / bB.dir.x
-			if bAFactor > 100 || bBFactor > 100 {
-				return solution{a: bAFactor, b: bBFactor, score: bAFactor*3 + bBFactor*1}, ErrUnsolvable
+			if bAFactor <= 100 && bBFactor <= 100 && (bAFactor*bA.dir.y+bBFactor*bB.dir.y) == p.y {
+				solutions = append(solutions, makeSol(bAFactor, bBFactor))
 			}
-			return solution{a: bAFactor, b: bBFactor, score: bAFactor*3 + bBFactor*1}, nil
 		}
+		cur = cur.diff(bB.dir)
+		gap = p.diff(cur)
+	}
+	if len(solutions) == 0 {
+		return solution{}, ErrUnsolvable
 	}
 
-	// confirm Y solution possible given X
-	// if we get to the bottom all options have been tested no solution
-	// err = unsolvable
-	return solution{}, ErrUnsolvable
+	// sort and return bottom
+	sort.Sort(solutions)
+	return solutions[0], nil
 }
 
 func part1(in io.Reader) {

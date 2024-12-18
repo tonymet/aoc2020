@@ -39,9 +39,16 @@ func makeSol(a, b int) solution {
 func (v vec) mult(x int) vec {
 	return vec{v.x * x, v.y * x}
 }
+func (v vec) add(x int) vec {
+	return vec{v.x + x, v.y + x}
+}
 
 func (v vec) div(x int) vec {
 	return vec{v.x / x, v.y / x}
+}
+
+func (v vec) eq(v2 vec) bool {
+	return v.x == v2.x && v.y == v2.y
 }
 
 func (v vec) mod2(v2 vec) vec {
@@ -72,6 +79,17 @@ var (
 	ErrUnsolvable     = fmt.Errorf("unsolvable")
 )
 
+func solve2(bA, bB button, prize vec) (int, error) {
+	det := bA.dir.x*bB.dir.y - bA.dir.y*bB.dir.x
+	a := (prize.x*bB.dir.y - prize.y*bB.dir.x) / det
+	b := (bA.dir.x*prize.y - bA.dir.y*prize.x) / det
+	if (vec{bA.dir.x*a + bB.dir.x*b, bA.dir.y*a + bB.dir.y*b}.eq(prize)) {
+		return a*3 + b, nil
+	} else {
+		return 0, ErrUnsolvable
+	}
+}
+
 func solve(bA, bB button, p vec) (solution, error) {
 	// test simple division % = 0 4 cases
 	cur := p
@@ -81,7 +99,10 @@ func solve(bA, bB button, p vec) (solution, error) {
 		if (cur.mod2(bA.dir) == vec{0, 0} && gap.mod2(bB.dir) == vec{0, 0}) {
 			bAFactor := cur.x / bA.dir.x
 			bBFactor := gap.x / bB.dir.x
-			if bAFactor <= 100 && bBFactor <= 100 && (bAFactor*bA.dir.y+bBFactor*bB.dir.y) == p.y {
+			if part == 1 && bAFactor <= 100 && bBFactor <= 100 && (bAFactor*bA.dir.y+bBFactor*bB.dir.y) == p.y {
+				solutions = append(solutions, makeSol(bAFactor, bBFactor))
+			}
+			if part == 2 && (bAFactor*bA.dir.y+bBFactor*bB.dir.y) == p.y {
 				solutions = append(solutions, makeSol(bAFactor, bBFactor))
 			}
 		}
@@ -122,12 +143,15 @@ func part1(in io.Reader) {
 			_, err := fmt.Fscanf(lineReader, "Prize: X=%d, Y=%d", &curPrize.x, &curPrize.y)
 			_ = err
 			fmt.Printf("P: %+v\n", curPrize)
-			solution, err := solve(activeButtons['A'], activeButtons['B'], curPrize)
+			if part == 2 {
+				curPrize = curPrize.add(p2Add)
+			}
+			score, err := solve2(activeButtons['A'], activeButtons['B'], curPrize)
 			if err != nil {
-				fmt.Printf("error: %s", err)
+				fmt.Printf("error: %s\n", err)
 			} else {
-				fmt.Printf("solution: %+v\n", solution)
-				sum += solution.score
+				fmt.Printf("solution: %+v\n", score)
+				sum += score
 			}
 			activeButtons = make(map[byte]button)
 		}
@@ -139,6 +163,7 @@ var (
 	part   int
 	file   string
 	silent bool
+	p2Add  int = 10000000000000
 )
 
 func init() {
@@ -156,10 +181,5 @@ func main() {
 			panic(err)
 		}
 	}
-	switch part {
-	case 2:
-		part2(os.Stdin)
-	default:
-		part1(os.Stdin)
-	}
+	part1(os.Stdin)
 }

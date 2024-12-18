@@ -25,7 +25,7 @@
             //  "args" : ["-p", "1", "-f",  "${fileDirname}/data/sample.txt"],
             //  "args" : ["-p", "1", "-f",  "${fileDirname}/data/sample2.txt"],
             // "args" : ["-p", "1", "-f",  "${fileDirname}/data/sample.txt"],
-              "args" : ["-p", "1", "-f",  "${fileDirname}/data/input.txt"],
+              "args" : ["-p", "2", "-f",  "${fileDirname}/data/input.txt"],
             //"args" : ["-s", "-p", "0", "-f",  "${fileDirname}/data/sample.txt"],
             //"showLog": true
         }

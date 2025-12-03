@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -46,7 +45,6 @@ func (rr rangeReader) Range() (r rangeMeta, err error) {
 }
 
 func Base10HalvesMatch(n int64) bool {
-	// 1. Handle sign and zero: Comparison uses the absolute value.
 	if n < 0 {
 		n = -n
 	}
@@ -58,39 +56,39 @@ func Base10HalvesMatch(n int64) bool {
 	if lowHalfLen == 0 || totalDigits%2 == 1 {
 		return false
 	}
-	divisor := int64(math.Pow(10, float64(lowHalfLen)))
-	lowSegment := n % divisor
-	highSegment := n / divisor
+	var divisor int64 = 1
+	for i := 0; i < lowHalfLen; i++ {
+		divisor *= 10
+	}
+	lowSegment, highSegment := n%divisor, n/divisor
 	return highSegment == lowSegment
 }
 
-func countDigits(n int64) int {
+func countDigits(n int64) (count int) {
 	if n == 0 {
 		return 1
 	}
-	// Handle negative numbers by using the absolute value
 	if n < 0 {
 		n = -n
 	}
-
-	count := 0
 	for n > 0 {
 		n /= 10
 		count++
 	}
-	return count
+	return
 }
 
-// see bufio.Scanner for example splitter-wrappers
 func CSVSplitter(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	loc := strings.IndexByte(string(data), ',')
-	if loc == -1 {
-		if !atEOF {
-			return 0, nil, nil
-		}
-		return 0, nil, bufio.ErrFinalToken
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
 	}
-	return loc + 1, data[:loc], nil
+	if i := strings.IndexByte(string(data), ','); i >= 0 {
+		return i + 1, data[0:i], nil
+	}
+	if atEOF {
+		return len(data), data[:len(data)-1], nil
+	}
+	return 0, nil, nil
 }
 
 func sumInts(is []int64) (sum int64) {
@@ -140,7 +138,3 @@ func main() {
 	}
 	part1(os.Stdin)
 }
-
-// if the len > pos in any direction,1 will be hit
-// if the len > 100, 0 will be hit the
-// pos - len  + len / 100

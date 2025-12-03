@@ -82,3 +82,4 @@ aoc2023/d3/data/input.txt filter=lfs diff=lfs merge=lfs -text
 aoc2024/d11/data/input.txt filter=lfs diff=lfs merge=lfs -text
 aoc2024/d1/data/sample.txt filter=lfs diff=lfs merge=lfs -text
 aoc2024/d9/data/sample0.txt filter=lfs diff=lfs merge=lfs -text
+**/*.txt filter=lfs diff=lfs merge=lfs -text

@@ -16,26 +16,51 @@ type Rot struct {
 
 type dial struct {
 	pos int64
+	zc  int64
 }
 
 var (
-	d dial = dial{pos: 50}
-	c int64
+	d  dial = dial{pos: 50}
+	c  int64
+	fc int64
 )
+
+func iAbs(b int64) int64 {
+	if b < 0 {
+		return -1 * b
+	}
+	return b
+}
 
 func (d *dial) op(r Rot) {
 	// if L , subtract value mod 99
 	// if R , add value mod 99
+	d.zc = 0
+	lpos, llen := d.pos, r.len
 	switch r.dir {
 	case 'L':
 		d.pos = (d.pos - r.len) % 100
 		if d.pos < 0 {
 			d.pos += 100
 		}
+		// zc calc
+		if d.pos == 0 {
+			d.zc++
+		}
+		if lpos-llen <= -100 {
+			d.zc += (iAbs(lpos-llen) / 100)
+			if lpos > 0 && lpos-(llen%100) < 0 {
+				d.zc++
+			}
+		} else if lpos-llen <= 0 {
+			if lpos-llen < 0 && lpos-llen > -100 && lpos != 0 {
+				d.zc++
+			}
+		}
 	case 'R':
 		d.pos = (d.pos + r.len) % 100
-		if d.pos < 0 {
-			d.pos += 100
+		if lpos+llen > 99 {
+			d.zc += (lpos + llen) / 100
 		}
 	}
 }
@@ -65,15 +90,19 @@ func part1(in io.Reader) {
 		if rot, err := rScanner.Rot(); err != nil {
 			panic(err)
 		} else {
-			fmt.Printf("rot : %s\t", rot)
+			fmt.Printf("d.pos : %d\t, rot : %s\t", d.pos, rot)
 			d.op(rot)
-			fmt.Printf("d.pos : %d\n", d.pos)
+			fmt.Printf("d.pos : %d, d.zc : %d\n", d.pos, d.zc)
 			if d.pos == 0 {
 				c++
 			}
+			if d.zc < 0 {
+				panic("oob")
+			}
+			fc += d.zc
 		}
 	}
-	fmt.Printf("count : %d\n", c)
+	fmt.Printf("count : %d\t, fc: %d\n", c, fc)
 }
 
 var (
@@ -96,3 +125,7 @@ func main() {
 	}
 	part1(os.Stdin)
 }
+
+// if the len > pos in any direction,1 will be hit
+// if the len > 100, 0 will be hit the
+// pos - len  + len / 100

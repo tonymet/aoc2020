@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -12,8 +13,17 @@ import (
 
 type myrange = [2]int64
 
+type rangeMeta struct {
+	myrange
+	rangeStr [2]string
+}
+
 type rangeReader struct {
 	*bufio.Scanner
+}
+
+func (rm rangeMeta) String() string {
+	return fmt.Sprintf("%s - %s (%d - %d )", rm.rangeStr[0], rm.rangeStr[1], rm.myrange[0], rm.myrange[1])
 }
 
 func NewScanner(in io.Reader) (rr rangeReader) {
@@ -22,16 +32,53 @@ func NewScanner(in io.Reader) (rr rangeReader) {
 	return
 }
 
-func (rr rangeReader) Range() (r myrange, err error) {
+func (rr rangeReader) Range() (r rangeMeta, err error) {
 	t := rr.Text()
 	parts := strings.Split(t, "-")
 	for i, p := range parts {
-		r[i], err = strconv.ParseInt(p, 10, 64)
+		r.myrange[i], err = strconv.ParseInt(p, 10, 64)
+		r.rangeStr[i] = p
 		if err != nil {
 			return
 		}
 	}
 	return
+}
+
+func Base10HalvesMatch(n int64) bool {
+	// 1. Handle sign and zero: Comparison uses the absolute value.
+	if n < 0 {
+		n = -n
+	}
+	if n == 0 {
+		return false
+	}
+	totalDigits := countDigits(n)
+	lowHalfLen := totalDigits / 2
+	if lowHalfLen == 0 || totalDigits%2 == 1 {
+		return false
+	}
+	divisor := int64(math.Pow(10, float64(lowHalfLen)))
+	lowSegment := n % divisor
+	highSegment := n / divisor
+	return highSegment == lowSegment
+}
+
+func countDigits(n int64) int {
+	if n == 0 {
+		return 1
+	}
+	// Handle negative numbers by using the absolute value
+	if n < 0 {
+		n = -n
+	}
+
+	count := 0
+	for n > 0 {
+		n /= 10
+		count++
+	}
+	return count
 }
 
 // see bufio.Scanner for example splitter-wrappers
@@ -46,15 +93,31 @@ func CSVSplitter(data []byte, atEOF bool) (advance int, token []byte, err error)
 	return loc + 1, data[:loc], nil
 }
 
+func sumInts(is []int64) (sum int64) {
+	for _, v := range is {
+		sum += v
+	}
+	return
+}
+
 func part1(in io.Reader) {
 	reader := NewScanner(in)
+	var sum int64
 	for reader.Scan() {
 		rec, err := reader.Range()
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%x\n", rec)
+		fmt.Printf("%+s\n", rec)
+		for i := rec.myrange[0]; i <= rec.myrange[1]; i++ {
+			if Base10HalvesMatch(i) {
+				fmt.Printf("found %d\t", i)
+				sum += i
+			}
+		}
+		fmt.Println("")
 	}
+	fmt.Printf("sums := %d\n", sum)
 }
 
 var (

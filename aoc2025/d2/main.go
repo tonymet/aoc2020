@@ -10,11 +10,11 @@ import (
 	"strings"
 )
 
-type myrange = [2]int64
+type intRange = [2]int64
 
 type rangeMeta struct {
-	myrange
-	rangeStr [2]string
+	intRange
+	strRange [2]string
 }
 
 type rangeReader struct {
@@ -22,7 +22,7 @@ type rangeReader struct {
 }
 
 func (rm rangeMeta) String() string {
-	return fmt.Sprintf("%s - %s (%d - %d )", rm.rangeStr[0], rm.rangeStr[1], rm.myrange[0], rm.myrange[1])
+	return fmt.Sprintf("%s - %s (%d - %d )", rm.strRange[0], rm.strRange[1], rm.intRange[0], rm.intRange[1])
 }
 
 func NewScanner(in io.Reader) (rr rangeReader) {
@@ -31,12 +31,12 @@ func NewScanner(in io.Reader) (rr rangeReader) {
 	return
 }
 
-func (rr rangeReader) Range() (r rangeMeta, err error) {
+func (rr rangeReader) RangeMeta() (r rangeMeta, err error) {
 	t := rr.Text()
 	parts := strings.Split(t, "-")
 	for i, p := range parts {
-		r.myrange[i], err = strconv.ParseInt(p, 10, 64)
-		r.rangeStr[i] = p
+		r.intRange[i], err = strconv.ParseInt(p, 10, 64)
+		r.strRange[i] = p
 		if err != nil {
 			return
 		}
@@ -44,7 +44,50 @@ func (rr rangeReader) Range() (r rangeMeta, err error) {
 	return
 }
 
-func Base10HalvesMatch(n int64) bool {
+func cmpIntSlice(a, b []int64) (same bool) {
+	same = true
+	for i, _ := range a {
+		if b[i] != a[i] {
+			return false
+		}
+	}
+	return
+}
+
+func divCmpInt(a int64) bool {
+	// convert to int slice
+	d := countDigits(a)
+	intSlice := make([]int64, d)
+	t := a
+	for i := d - 1; i >= 0; i-- {
+		intSlice[i] = t % 10
+		t = t / 10
+	}
+	return divCmp(intSlice)
+}
+
+func divCmp(a []int64) (match bool) {
+	match = false
+	var last []int64
+	for h := len(a) / 2; h >= 1; h-- {
+		if len(a)%h != 0 {
+			continue
+		}
+		last = a[0:h]
+		for k := h; k <= len(a)-h; k += h {
+			if match = cmpIntSlice(last, a[k:k+h]); !match {
+				break
+			}
+			last = a[k : k+h]
+		}
+		if match {
+			return true
+		}
+	}
+	return
+}
+
+func halvesMatch(n int64) bool {
 	if n < 0 {
 		n = -n
 	}
@@ -98,17 +141,36 @@ func sumInts(is []int64) (sum int64) {
 	return
 }
 
-func part1(in io.Reader) {
+func part2(in io.Reader) {
 	reader := NewScanner(in)
 	var sum int64
 	for reader.Scan() {
-		rec, err := reader.Range()
+		rec, err := reader.RangeMeta()
 		if err != nil {
 			panic(err)
 		}
 		fmt.Printf("%+s\n", rec)
-		for i := rec.myrange[0]; i <= rec.myrange[1]; i++ {
-			if Base10HalvesMatch(i) {
+		for i := rec.intRange[0]; i <= rec.intRange[1]; i++ {
+			if divCmpInt(i) {
+				fmt.Printf("found %d\t", i)
+				sum += i
+			}
+		}
+		fmt.Println("")
+	}
+	fmt.Printf("sums := %d\n", sum)
+}
+func part1(in io.Reader) {
+	reader := NewScanner(in)
+	var sum int64
+	for reader.Scan() {
+		rec, err := reader.RangeMeta()
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("%+s\n", rec)
+		for i := rec.intRange[0]; i <= rec.intRange[1]; i++ {
+			if halvesMatch(i) {
 				fmt.Printf("found %d\t", i)
 				sum += i
 			}
@@ -136,5 +198,12 @@ func main() {
 			panic(err)
 		}
 	}
-	part1(os.Stdin)
+	switch part {
+	case 1:
+		part1(os.Stdin)
+	case 2:
+		part2(os.Stdin)
+	default:
+		panic("no part")
+	}
 }

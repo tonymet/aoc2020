@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type intRange = [2]int64
@@ -46,7 +47,7 @@ func (rr rangeReader) RangeMeta() (r rangeMeta, err error) {
 
 func cmpIntSlice(a, b []int64) (same bool) {
 	same = true
-	for i, _ := range a {
+	for i := range a {
 		if b[i] != a[i] {
 			return false
 		}
@@ -55,7 +56,6 @@ func cmpIntSlice(a, b []int64) (same bool) {
 }
 
 func divCmpInt(a int64) bool {
-	// convert to int slice
 	d := countDigits(a)
 	intSlice := make([]int64, d)
 	t := a
@@ -149,14 +149,20 @@ func part2(in io.Reader) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%+s\n", rec)
+		if !quiet {
+			fmt.Printf("%+s\n", rec)
+		}
 		for i := rec.intRange[0]; i <= rec.intRange[1]; i++ {
 			if divCmpInt(i) {
-				fmt.Printf("found %d\t", i)
+				if !quiet {
+					fmt.Printf("found %d\t", i)
+				}
 				sum += i
 			}
 		}
-		fmt.Println("")
+		if !quiet {
+			fmt.Println("")
+		}
 	}
 	fmt.Printf("sums := %d\n", sum)
 }
@@ -181,13 +187,15 @@ func part1(in io.Reader) {
 }
 
 var (
-	part int
-	file string
+	part  int
+	file  string
+	quiet bool
 )
 
 func init() {
 	flag.IntVar(&part, "p", 1, "which exercise part?")
 	flag.StringVar(&file, "f", "", "which exercise part?")
+	flag.BoolVar(&quiet, "q", true, "which exercise part?")
 }
 
 func main() {
@@ -198,6 +206,7 @@ func main() {
 			panic(err)
 		}
 	}
+	start := time.Now()
 	switch part {
 	case 1:
 		part1(os.Stdin)
@@ -206,4 +215,5 @@ func main() {
 	default:
 		panic("no part")
 	}
+	fmt.Printf("duration: %s", time.Since(start))
 }

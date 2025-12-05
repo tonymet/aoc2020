@@ -22,3 +22,9 @@ func Test_divCmpInt(t *testing.T) {
 		})
 	}
 }
+
+func Benchmark_divCmpInt(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		divCmpInt(97979797)
+	}
+}

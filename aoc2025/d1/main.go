@@ -16,11 +16,9 @@ type Rot struct {
 
 type dial struct {
 	pos int64
-	zc  int64
 }
 
 var (
-	d  dial = dial{pos: 50}
 	c  int64
 	fc int64
 )
@@ -32,10 +30,7 @@ func iAbs(b int64) int64 {
 	return b
 }
 
-func (d *dial) op(r Rot) {
-	// if L , subtract value mod 99
-	// if R , add value mod 99
-	d.zc = 0
+func (d *dial) op(r Rot) (zc int64) {
 	lpos, llen := d.pos, r.len
 	switch r.dir {
 	case 'L':
@@ -43,26 +38,19 @@ func (d *dial) op(r Rot) {
 		if d.pos < 0 {
 			d.pos += 100
 		}
-		// zc calc
-		if d.pos == 0 {
-			d.zc++
-		}
-		if lpos-llen <= -100 {
-			d.zc += (iAbs(lpos-llen) / 100)
-			if lpos > 0 && lpos-(llen%100) < 0 {
-				d.zc++
-			}
-		} else if lpos-llen <= 0 {
-			if lpos-llen < 0 && lpos-llen > -100 && lpos != 0 {
-				d.zc++
-			}
+		r := llen % 100
+		d := iAbs(llen) - r
+		zc += d / 100
+		if lpos > 0 && lpos-r <= 0 {
+			zc++
 		}
 	case 'R':
 		d.pos = (d.pos + r.len) % 100
 		if lpos+llen > 99 {
-			d.zc += (lpos + llen) / 100
+			zc += (lpos + llen) / 100
 		}
 	}
+	return
 }
 
 type RScanner struct {
@@ -86,20 +74,21 @@ func (rs Rot) String() string {
 func part1(in io.Reader) {
 	lineScanner := bufio.NewScanner(in)
 	rScanner := RScanner{*lineScanner}
+	d := dial{pos: 50}
 	for rScanner.Scan() {
 		if rot, err := rScanner.Rot(); err != nil {
 			panic(err)
 		} else {
 			fmt.Printf("d.pos : %d\t, rot : %s\t", d.pos, rot)
-			d.op(rot)
-			fmt.Printf("d.pos : %d, d.zc : %d\n", d.pos, d.zc)
+			zc := d.op(rot)
+			fmt.Printf("d.pos : %d, d.zc : %d\n", d.pos, zc)
 			if d.pos == 0 {
 				c++
 			}
-			if d.zc < 0 {
+			if zc < 0 {
 				panic("oob")
 			}
-			fc += d.zc
+			fc += zc
 		}
 	}
 	fmt.Printf("count : %d\t, fc: %d\n", c, fc)
@@ -125,7 +114,3 @@ func main() {
 	}
 	part1(os.Stdin)
 }
-
-// if the len > pos in any direction,1 will be hit
-// if the len > 100, 0 will be hit the
-// pos - len  + len / 100

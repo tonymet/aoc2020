@@ -1,11 +1,9 @@
-**/data
 .DS_Store
-d1/output.txt
 main
-output.txt
 session
 tmp
 **/cpu*.prof
 **/mem*.prof
 **/d*.test
 *.exe
+**/*:Zone.Identifier

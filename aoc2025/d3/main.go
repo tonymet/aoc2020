@@ -14,13 +14,15 @@ import (
 )
 
 var (
-	part int
-	file string
+	part  int
+	file  string
+	quiet bool
 )
 
 func init() {
 	flag.IntVar(&part, "p", 1, "which exercise part?")
 	flag.StringVar(&file, "f", "", "which exercise part?")
+	flag.BoolVar(&quiet, "q", true, "quiet?")
 }
 
 func stringInts(s string) (r []int64, err error) {
@@ -139,9 +141,9 @@ func part1(in io.Reader) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%v\t", ints)
+		//fmt.Printf("%v\t", ints)
 		max := findMax(ints)
-		fmt.Printf("max: %d\n", max)
+		//fmt.Printf("max: %d\n", max)
 		sum += max
 	}
 	fmt.Printf("sum: %d\n", sum)
@@ -149,7 +151,6 @@ func part1(in io.Reader) {
 
 func part2(in io.Reader) {
 	scanner := bufio.NewScanner(in)
-	// sum := big.NewInt(0)
 	var sum int64
 	for scanner.Scan() {
 		t := scanner.Text()
@@ -157,9 +158,13 @@ func part2(in io.Reader) {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%+x\t", ints)
+		if !quiet {
+			fmt.Printf("%+x\t", ints)
+		}
 		max := findMax3(ints)
-		fmt.Printf("max: %s\n", max)
+		if !quiet {
+			fmt.Printf("max: %d\n", max)
+		}
 		sum += max
 	}
 	fmt.Printf("sum: %d\n", sum)

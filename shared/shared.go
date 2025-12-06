@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -50,4 +51,16 @@ func SplitterFactory(re *regexp.Regexp) func([]byte, bool) (int, []byte, error) 
 		}
 		return loc[1], data[loc[0]:loc[1]], nil
 	}
+}
+
+func stringInts(s string) (r []int64, err error) {
+	r = make([]int64, 0, 40)
+	for _, c := range s {
+		v, err := strconv.ParseInt(string(c), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		r = append(r, v)
+	}
+	return r, nil
 }

@@ -10,7 +10,7 @@ import (
 	_ "strconv"
 	"strings"
 
-	"github.com/stevenle/topsort/v2"
+	"github.com/tonymet/aoc2020/shared/topsort/v2"
 )
 
 var (

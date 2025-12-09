@@ -13,13 +13,22 @@ type fileParam struct {
 	cols, rows int
 }
 
+const (
+	target = '@'
+)
+
 var (
 	files map[string]fileParam = map[string]fileParam{
 		"sample": {cols: 10, rows: 10},
-		"input":  {cols: 100, rows: 100},
+		"input":  {cols: 140, rows: 140},
 	}
 	filetype string
 	newline  = "\r\n"
+	offsets  = [][2]int{
+		{-1, -1}, {-1, 0}, {-1, 1},
+		{0, -1}, {0, 1},
+		{1, -1}, {1, 0}, {1, 1},
+	}
 )
 
 func part2(in io.Reader) {
@@ -27,22 +36,36 @@ func part2(in io.Reader) {
 }
 
 func part1(in io.Reader) {
-	rows, cols := files[filetype].rows, files[filetype].cols
-	mapData := make([][]byte, 0, cols)
+	R, C := files[filetype].rows, files[filetype].cols
+	grid := make([][]byte, 0, C)
 	scanner := bufio.NewScanner(in)
 	for scanner.Scan() {
 		line := scanner.Text()
-		mapData = append(mapData, []byte(line))
+		grid = append(grid, []byte(line))
 	}
-	fmt.Printf("%s\n", mapData)
-	_ = rows
-
-	// for r :=0 ; r < rows; r++{
-	// 	for c:=0; c < cols; c++{
-	// 		tCount := 0
-
-	// 	}
-	// }
+	//fmt.Printf("%s\n", grid)
+	totalCount := 0
+	for r := 0; r < R; r++ {
+		for c := 0; c < C; c++ {
+			tCount := 0
+			if grid[r][c] != target {
+				continue
+			}
+			for _, offset := range offsets {
+				dr, dc := offset[0], offset[1]
+				nr, nc := r+dr, c+dc
+				if nr >= 0 && nr < R && nc >= 0 && nc < C {
+					if grid[nr][nc] == target {
+						tCount++
+					}
+				}
+			}
+			if tCount < 4 {
+				totalCount++
+			}
+		}
+	}
+	fmt.Printf("totalCount: %d\n", totalCount)
 }
 
 var (

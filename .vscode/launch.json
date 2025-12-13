@@ -29,8 +29,9 @@
              //"args" : ["-p", "1", "-type", "sample", "-f",  "${fileDirname}/data/sample.txt"],
              //"args" : ["-p", "1", "-type", "input", "-f",  "${fileDirname}/data/input.txt"],
             //  "args" : ["-type", "sample", "-f",  "${fileDirname}/data/sample.txt"],
-             "args" : [ "-p", "1", "-f", "${fileDirname}/data/sample.txt"],
-             //"args" : ["-type", "input", "-f",  "${fileDirname}/../data/input.txt"],
+             "args" : [ "-p", "1", "-f", "${fileDirname}/data/input.txt"],
+            //  "args" : [ "-p", "1", "-f", "${fileDirname}/data/sample.txt"],
+            //  "args" : ["-type", "input", "-f",  "${fileDirname}/../data/input.txt"],
             //"args" : ["-s", "-p", "0", "-f",  "${fileDirname}/data/sample.txt"],
             //"showLog": true
             "hideSystemGoroutines": true,

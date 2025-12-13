@@ -9,7 +9,6 @@ import (
 	"os"
 	"path"
 	"sort"
-	_ "sort"
 )
 
 // storage
@@ -18,8 +17,8 @@ import (
 
 var (
 	filetypes = map[string]fileparam{
-		"sample.txt": fileparam{20, 10, 3},
-		"input.txt":  fileparam{1000, 1000, 3},
+		"sample.txt": {20, 10, 3},
+		"input.txt":  {1000, 1000, 3},
 	}
 	activeParam fileparam
 )
@@ -51,38 +50,19 @@ func (e edge) String() string {
 
 type tracker struct {
 	seen     map[pair]bool
-	circuits []int64
-	circ2    map[int][]coord
+	circuits map[int][]coord
 	// lookup circuit and increment
-	cLookup map[coord]int
-	oEdges  []edge
+	cLookup  map[coord]int
+	allEdges edges
 }
 
-// type node struct {
-// 	coord
-// 	neighbors []coord
-// }
-
 func dist(p1, p2 coord) float64 {
-	dx := p2.x - p1.x
-	dy := p2.y - p1.y
-	dz := p2.z - p1.z
+	dx, dy, dz := p2.x-p1.x, p2.y-p1.y,
+		p2.z-p1.z
 	return math.Sqrt(float64(dx*dx + dy*dy + dz*dz))
 }
 
 type edges []edge
-
-// heap
-
-func (g edges) Contains(c coord) (seen bool) {
-	seen = false
-	for _, e := range g {
-		if e.l.Eq(c) {
-			return true
-		}
-	}
-	return
-}
 
 func (g edges) Len() int {
 	return len(g)
@@ -108,11 +88,7 @@ func (e *edges) Pop() any {
 	return item
 }
 
-func part2(in io.Reader) {
-	fmt.Printf("part2 not implemented\n")
-}
-
-func part1(in io.Reader) {
+func prepTracker(in io.Reader, t *tracker) {
 	var allCoords coords
 	allCoords = make(coords, 0, activeParam.records)
 	for {
@@ -127,14 +103,9 @@ func part1(in io.Reader) {
 		allCoords = append(allCoords, cur)
 		//fmt.Printf("%d,%d,%d \n", cur.x, cur.y, cur.z)
 	}
-	//fmt.Printf("%+v\n", allCoords)
-	var (
-		allEdges edges
-		t        tracker
-	)
-	allEdges = make(edges, 0, 1e6)
+	t.allEdges = make(edges, 0, 1e6)
 	t.seen = make(map[pair]bool)
-	heap.Init(&allEdges)
+	heap.Init(&t.allEdges)
 	for i := 0; i < len(allCoords); i++ {
 		for j := 0; j < len(allCoords); j++ {
 			if allCoords[i].Eq(allCoords[j]) {
@@ -150,28 +121,44 @@ func part1(in io.Reader) {
 			if _, ok := t.seen[e.pair]; ok {
 				continue
 			} else {
-				heap.Push(&allEdges, e)
+				heap.Push(&t.allEdges, e)
 				t.seen[e.pair] = true
 			}
 		}
 	}
-	// set up initial circuits
-	// show the top edges
-	fmt.Printf("allCoords: %d\t allE: %d\n", len(allCoords), len(allEdges))
-	cid := 0
+	fmt.Printf("allCoords: %d\t allE: %d\n", len(allCoords), len(t.allEdges))
 	t.cLookup = make(map[coord]int)
-	t.circuits = make([]int64, activeParam.records)
-	t.circ2 = make(map[int][]coord)
-	for _, v := range allCoords {
+	t.circuits = make(map[int][]coord)
+	for cid, v := range allCoords {
 		t.cLookup[v] = cid
-		t.circuits[cid]++
-		t.circ2[cid] = append(t.circ2[cid], v)
-		cid++
+		t.circuits[cid] = append(t.circuits[cid], v)
 	}
-	t.oEdges = make([]edge, 0, len(allEdges))
-	for i := 0; i < activeParam.top; i++ {
-		cur := heap.Pop(&allEdges).(edge)
-		t.oEdges = append(t.oEdges, cur)
+}
+
+func solve(in io.Reader) {
+	var (
+		t      tracker
+		last   edge
+		i      = 0
+		cond   func() bool
+		maxLen = 1
+	)
+	prepTracker(in, &t)
+	switch part {
+	case 1:
+		cond = func() bool {
+			return i < activeParam.top
+		}
+	case 2:
+		cond = func() bool {
+			return maxLen <= activeParam.records-1
+		}
+	default:
+		panic("no part")
+	}
+	for i = 0; cond(); i++ {
+		cur := heap.Pop(&t.allEdges).(edge)
+		last = cur
 		vl, okl := t.cLookup[cur.l]
 		vr, okr := t.cLookup[cur.r]
 		if !okl || !okr {
@@ -180,52 +167,36 @@ func part1(in io.Reader) {
 		if t.cLookup[cur.l] == t.cLookup[cur.r] {
 			continue
 		}
-		if t.circuits[vl] > t.circuits[vr] {
-			t.circuits[vl] += t.circuits[vr]
-			t.circuits[vr] = 0
-			t.cLookup[cur.r] = vl
-			for _, v := range t.circ2[vr] {
-				t.cLookup[v] = vl
-			}
-			t.circ2[vl] = append(t.circ2[vl], t.circ2[vr]...)
-			t.circ2[vr] = make([]coord, 0)
-
-		} else {
-			t.circuits[vr] += t.circuits[vl]
-			t.circuits[vl] = 0
-			t.cLookup[cur.l] = vr
-			for _, v := range t.circ2[vl] {
-				t.cLookup[v] = vr
-			}
-			t.circ2[vr] = append(t.circ2[vr], t.circ2[vl]...)
-			t.circ2[vl] = make([]coord, 0)
+		for _, v := range t.circuits[vr] {
+			t.cLookup[v] = vl
+		}
+		t.circuits[vl] = append(t.circuits[vl], t.circuits[vr]...)
+		t.circuits[vr] = make([]coord, 0)
+		if len(t.circuits[vl]) > maxLen {
+			maxLen = len(t.circuits[vl])
 		}
 	}
-	_ = t.oEdges
-	// sort
-	sl := t.circuits
-	sort.Slice(sl, func(i, j int) bool {
-		return sl[i] > sl[j]
-	})
-	circSlice := make([]int, len(t.circ2))
-	for k, v := range t.circ2 {
+	switch part {
+	case 1:
+		fmt.Printf("part1 prod: %d\n", part1Prod(&t))
+	case 2:
+		fmt.Printf("part2 prod: %d\n", last.l.x*last.r.x)
+	}
+}
+
+func part1Prod(t *tracker) int64 {
+	circSlice := make([]int, len(t.circuits))
+	for k, v := range t.circuits {
 		circSlice[k] = len(v)
 	}
 	sort.Slice(circSlice, func(i, j int) bool {
 		return circSlice[i] > circSlice[j]
 	})
-
-	//fmt.Printf("ordered: %+x\n", sl)
-	prod := int64(1)
+	part1Prod := int64(1)
 	for i := 0; i < activeParam.productLimit; i++ {
-		prod *= sl[i]
+		part1Prod *= int64(circSlice[i])
 	}
-	prod2 := int64(1)
-	for i := 0; i < activeParam.productLimit; i++ {
-		prod2 *= int64(circSlice[i])
-	}
-	fmt.Printf("prod: %d\n", prod)
-	fmt.Printf("prod2: %d\n", prod)
+	return part1Prod
 }
 
 var (
@@ -238,7 +209,6 @@ func init() {
 	flag.IntVar(&part, "p", 1, "which exercise part?")
 	flag.StringVar(&file, "f", "", "which exercise part?")
 	flag.BoolVar(&silent, "s", false, "silent?")
-
 }
 
 func main() {
@@ -249,12 +219,6 @@ func main() {
 			panic(err)
 		}
 	}
-	basename := path.Base(file)
-	activeParam = filetypes[basename]
-	switch part {
-	case 2:
-		part2(os.Stdin)
-	default:
-		part1(os.Stdin)
-	}
+	activeParam = filetypes[path.Base(file)]
+	solve(os.Stdin)
 }

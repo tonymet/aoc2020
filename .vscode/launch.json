@@ -31,7 +31,7 @@
             //  "args" : ["-type", "sample", "-f",  "${fileDirname}/data/sample.txt"],
              //"args" : [ "-p", "1", "-f", "${fileDirname}/data/input.txt"],
              "args" : [ "-p", "1", "-f", "${fileDirname}/data/input.txt"],
-            //  "args" : [ "-p", "1", "-f", "${fileDirname}/data/sample.txt"],
+             //"args" : [ "-p", "1", "-f", "${fileDirname}/data/sample.txt"],
             //  "args" : [ "-p", "2", "-f", "${fileDirname}/data/input.txt"],
             //  "args" : [ "-p", "1", "-f", "${fileDirname}/data/input.txt"],
             //  "args" : [ "-p", "1", "-f", "${fileDirname}/data/sample.txt"],

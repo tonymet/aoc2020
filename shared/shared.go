@@ -29,6 +29,23 @@ func Log(f string, val ...any) {
 	fmt.Printf(f, val...)
 }
 
+func Powerset(data [][]int, f func([][]int)) {
+	n := len(data)
+	// Total number of subsets is 2^n
+	numSubsets := 1 << n
+
+	for i := 0; i < numSubsets; i++ {
+		var subset [][]int
+		for j := 0; j < n; j++ {
+			// Check if the j-th bit is set in mask i
+			if (i>>j)&1 == 1 {
+				subset = append(subset, data[j])
+			}
+		}
+		f(subset)
+	}
+}
+
 func LineProcessor(in io.Reader, processor func(io.Reader)) {
 	lineScanner := bufio.NewScanner(in)
 	for lineScanner.Scan() {

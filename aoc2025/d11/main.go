@@ -13,7 +13,8 @@ import (
 
 type mymap map[string][]string
 type myroute []string
-type fftStat map[*[]string]struct {
+type fftStat map[*[]string]fftTrack
+type fftTrack struct {
 	fft, dac bool
 }
 
@@ -25,6 +26,7 @@ var (
 	activeParam fileparam
 	numRoutes   int
 	tfftStat    fftStat
+	iter        int
 )
 
 type fileparam struct {
@@ -55,18 +57,49 @@ func (m mymap) String() string {
 	return b.String()
 }
 
-func solve(km mymap, start string, route []string) {
+func solve2(km mymap, start, end string, t fftTrack) {
 	next := km[start]
-	if next[0] == "out" {
+	if next[0] == end {
+		// if t.dac && t.fft {
+		// 	numRoutes++
+		// }
 		numRoutes++
 		return
 	}
 	for _, v := range next {
-		solve(km, v, route)
+		if v == "out" {
+			continue
+		}
+		if v == "fft" {
+			t.fft = true
+		}
+		if v == "dac" {
+			t.dac = true
+		}
+		iter++
+		solve2(km, v, end, t)
 	}
 
 }
-func part1(in io.Reader) {
+func solve(km mymap, start, end string, t fftTrack) {
+	next := km[start]
+	if next[0] == end {
+		numRoutes++
+		return
+	}
+	for _, v := range next {
+		if v == "out" {
+			continue
+		}
+		solve(km, v, end, t)
+	}
+
+}
+
+// func parse(in io.Reader) mymap{
+
+// }
+func parse(in io.Reader) mymap {
 	scanner := bufio.NewScanner(in)
 	keyMap := make(map[string][]string)
 	tfftStat = make(fftStat)
@@ -75,10 +108,14 @@ func part1(in io.Reader) {
 		parts := strings.Split(line, ":")
 		keyMap[parts[0]] = strings.Fields(parts[1])
 	}
+	return keyMap
+}
+func part1(in io.Reader) {
+	keyMap := parse(in)
 	if !silent {
 		fmt.Printf("keymap:\n%s\n", mymap(keyMap))
 	}
-	solve(keyMap, "you", make([]string, 0, 10))
+	solve(keyMap, "you", "out", fftTrack{})
 	fmt.Printf("route count: %d\n", numRoutes)
 }
 
